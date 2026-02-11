@@ -1,0 +1,9 @@
+.env
+.env.local
+.env.development
+config.js
+settings.py
+firebase.json
+aws keys
+jwt secrets
+api keys
