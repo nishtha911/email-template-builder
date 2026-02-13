@@ -1,18 +1,17 @@
-const { createUser, findUserByEmail } = require("../../models/user.model");
-const { hashPassword } = require("../../utils/hash");
+const pool = require("../../config/db");
+const bcrypt = require("bcryptjs");
 
-const registerUser = async (data) => {
-  const { name, email, password } = data;
+exports.createUser = async ({ name, email, password }) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const existing = await findUserByEmail(email);
-  if (existing) {
-    throw new Error("Email already registered");
-  }
+  const query = `
+    INSERT INTO users (name, email, password)
+    VALUES ($1, $2, $3)
+    RETURNING id, name, email;
+  `;
 
-  const hashed = await hashPassword(password);
+  const values = [name, email, hashedPassword];
+  const { rows } = await pool.query(query, values);
 
-  const user = await createUser(name, email, hashed);
-  return user;
+  return rows[0];
 };
-
-module.exports = { registerUser };
