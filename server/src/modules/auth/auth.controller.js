@@ -1,19 +1,13 @@
-const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const authService = require("./auth.service");
 
 exports.register = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const user = await authService.createUser(req.body);
+    const user = await authService.registerUser(req.body);
 
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'secret',
       { expiresIn: "1d" }
     );
 
@@ -24,10 +18,10 @@ exports.register = async (req, res) => {
     });
 
   } catch (err) {
+    console.error(err);
     if (err.code === "23505") {
       return res.status(400).json({ message: "Email already exists" });
     }
-
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
