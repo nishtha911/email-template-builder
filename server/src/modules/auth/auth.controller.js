@@ -25,3 +25,23 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+exports.login = async (req, res) => {
+  try {
+    const user = await authService.loginUser(req.body);
+
+    const token = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user,
+    });
+  } catch (err) {
+    res.status(401).json({ message: err.message });
+  }
+};
