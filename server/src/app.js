@@ -7,14 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/test-direct", (req, res) => {
-  res.json({ message: "Direct app route works!" });
-});
-
 app.use("/api/auth", authRoutes);
-
-app.get("/", (req, res) => {
-  res.send("API working");
-});
 
 module.exports = app;

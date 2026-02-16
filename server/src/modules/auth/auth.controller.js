@@ -7,7 +7,7 @@ exports.register = async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'secret',
+      process.env.JWT_SECRET || "secret",
       { expiresIn: "1d" }
     );
 
@@ -16,13 +16,15 @@ exports.register = async (req, res) => {
       token,
       user,
     });
-
   } catch (err) {
-    console.error(err);
     if (err.code === "23505") {
       return res.status(400).json({ message: "Email already exists" });
     }
-    res.status(500).json({ message: "Server error", error: err.message });
+
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
 
@@ -32,7 +34,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "secret",
       { expiresIn: "1d" }
     );
 
