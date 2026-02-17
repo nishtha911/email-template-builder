@@ -1,12 +1,9 @@
-const {
-  createUser,
-  findUserByEmail,
-} = require("../../models/user.model");
+const { createUser, findUserByEmail, } = require("../../models/user.model");
+const { hashPassword, comparePassword,} = require("../../utils/hash");
 
-const {
-  hashPassword,
-  comparePassword,
-} = require("../../utils/hash");
+const crypto = require("crypto");
+const pool = require("../../config/db");
+const sendEmail = require("../../utils/email");
 
 const registerUser = async (data) => {
   const { name, email, password } = data;
@@ -47,4 +44,36 @@ const loginUser = async (data) => {
 module.exports = {
   registerUser,
   loginUser,
+};
+
+const forgotPassword = async (email) => {
+  const user = await findUserByEmail(email);
+  if (!user) throw new Error("No user found with that email");
+
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+  const expiry = new Date(Date.now() + 3600000); 
+  await pool.query(
+    "UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE id = $3",
+    [tokenHash, expiry, user.id]
+  );
+
+  const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+  const message = `Forgot your password? Click here to reset: ${resetUrl}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Password Reset Token",
+      message
+    });
+    return resetToken; 
+  } catch (err) {
+    await pool.query(
+      "UPDATE users SET reset_password_token = NULL, reset_password_expires = NULL WHERE id = $1",
+      [user.id]
+    );
+    throw new Error("Email could not be sent");
+  }
 };
