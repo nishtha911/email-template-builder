@@ -1,21 +1,10 @@
 const router = require("express").Router();
 const controller = require("./auth.controller");
-const { registerValidation } = require("./auth.validation");
-const { validationResult } = require("express-validator");
+const authMiddleware = require("../../middleware/auth.middleware"); 
 
-router.post(
-  "/register",
-  registerValidation,
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-  },
-  controller.register
-);
-
+router.post("/register", controller.register);
 router.post("/login", controller.login);
+
+router.get("/me", authMiddleware, controller.getMe);
 
 module.exports = router;
