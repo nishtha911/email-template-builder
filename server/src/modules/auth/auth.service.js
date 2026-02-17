@@ -41,11 +41,6 @@ const loginUser = async (data) => {
   return user;
 };
 
-module.exports = {
-  registerUser,
-  loginUser,
-};
-
 const forgotPassword = async (email) => {
   const user = await findUserByEmail(email);
   if (!user) throw new Error("No user found with that email");
@@ -77,3 +72,25 @@ const forgotPassword = async (email) => {
     throw new Error("Email could not be sent");
   }
 };
+
+const resetPassword = async (token, newPassword) => {
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  const { rows } = await pool.query(
+    "SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > NOW()",
+    [tokenHash]
+  );
+
+  const user = rows[0];
+  if (!user) throw new Error("Token is invalid or has expired");
+
+  const hashed = await hashPassword(newPassword);
+  await pool.query(
+    "UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id = $2",
+    [hashed, user.id]
+  );
+
+  return user;
+};
+
+module.exports = { registerUser, loginUser, forgotPassword, resetPassword };

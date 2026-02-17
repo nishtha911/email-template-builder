@@ -65,3 +65,21 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    await authService.forgotPassword(req.body.email);
+    res.status(200).json({ message: "Reset link sent to email" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    await authService.resetPassword(req.params.token, req.body.password);
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
