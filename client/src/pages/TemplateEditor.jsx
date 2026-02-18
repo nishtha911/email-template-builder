@@ -76,7 +76,7 @@ const CanvasDropZone = ({ elements, selectedId, onSelect }) => {
             )}
             {el.type === 'image' && (
                 <div className="bg-light p-5 text-center border border-dashed rounded text-muted">
-                    <small>🖼️ Image Placeholder</small>
+                    <small>Image Placeholder</small>
                 </div>
             )}
           </div>
