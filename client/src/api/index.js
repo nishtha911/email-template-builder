@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:5000/api/auth' });
+const API = axios.create({ baseURL: 'http://localhost:5000/api' });
 
-// Automatically attaches JWT token to every request
 API.interceptors.request.use((req) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -11,9 +10,10 @@ API.interceptors.request.use((req) => {
     return req;
 });
 
-// Auth Endpoints
-export const signIn = (data) => API.post('/login', data);
-export const signUp = (data) => API.post('/register', data); 
-export const getMe = () => API.get('/me');
-export const forgotPassword = (email) => API.post('/forgot-password', { email });
-export const resetPassword = (token, password) => API.put(`/reset-password/${token}`, { password });
+export const signIn = (data) => API.post('/auth/login', data);
+export const signUp = (data) => API.post('/auth/register', data);
+export const getMe = () => API.get('/auth/me');
+export const saveTemplate = (data) => API.post('/templates/save', data);
+export const fetchTemplates = () => API.get('/templates/all');
+export const fetchTemplateById = (id) => API.get(`/templates/${id}`);
+export const deleteTemplate = (id) => API.delete(`/templates/${id}`);

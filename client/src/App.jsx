@@ -6,6 +6,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import ResetPassword from './pages/ResetPassword'
 import TemplateEditor from './pages/TemplateEditor';
+import TemplateList from './pages/TemplateList';
+
 
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
@@ -41,6 +43,17 @@ function App() {
                         </ProtectedRoute>
                     } 
                 />
+                <Route 
+                path="/templates" 
+                element={
+                    <ProtectedRoute>
+                        <TemplateList />
+                    </ProtectedRoute>
+                } 
+            />
+            <Route path="/editor" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />
+            <Route path="/editor/:id" element={<ProtectedRoute><TemplateEditor /></ProtectedRoute>} />
+
                 </Routes>
             </Router>
         </AuthProvider>
