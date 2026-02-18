@@ -1,5 +1,5 @@
-const { createUser, findUserByEmail, } = require("../../models/user.model");
-const { hashPassword, comparePassword,} = require("../../utils/hash");
+const { createUser, findUserByEmail } = require("../../models/user.model");
+const { hashPassword, comparePassword} = require("../../utils/hash");
 
 const crypto = require("crypto");
 const pool = require("../../config/db");
