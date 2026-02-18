@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import ResetPassword from './pages/ResetPassword'
+import TemplateEditor from './pages/TemplateEditor';
 
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
@@ -32,6 +33,14 @@ function App() {
 
                     <Route path="*" element={<Navigate to="/login" />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} /> 
+                    <Route 
+                    path="/editor" 
+                    element={
+                        <ProtectedRoute>
+                            <TemplateEditor />
+                        </ProtectedRoute>
+                    } 
+                />
                 </Routes>
             </Router>
         </AuthProvider>
