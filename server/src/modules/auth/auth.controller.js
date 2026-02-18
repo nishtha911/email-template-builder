@@ -1,9 +1,15 @@
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 const authService = require("./auth.service");
 const pool = require("../../config/db");
 
 exports.register = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const user = await authService.registerUser(req.body);
 
     const token = jwt.sign(
@@ -77,7 +83,10 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    await authService.resetPassword(req.params.token, req.body.password);
+    await authService.resetPassword(
+      req.params.token,
+      req.body.password
+    );
     res.status(200).json({ message: "Password reset successful" });
   } catch (err) {
     res.status(400).json({ message: err.message });

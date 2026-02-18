@@ -54,7 +54,7 @@ const forgotPassword = async (email) => {
     [tokenHash, expiry, user.id]
   );
 
-  const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+  const resetUrl = `http://localhost:5000/reset-password/${resetToken}`;
   const message = `Forgot your password? Click here to reset: ${resetUrl}`;
 
   try {
