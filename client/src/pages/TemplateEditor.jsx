@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { useAuth } from '../context/AuthContext';
 import { saveTemplate, fetchTemplateById } from '../api';
-import { compileToHTML } from '../utils/compiler'; 
+import { compileToHTML } from '../../../server/src/utils/compiler'; 
 
 const DraggableBlock = ({ type, label }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
