@@ -14,3 +14,4 @@ CREATE TABLE IF NOT EXISTS templates (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
