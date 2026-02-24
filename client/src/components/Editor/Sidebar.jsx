@@ -1,57 +1,64 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { Box, Typography, TextField, Slider, ToggleButtonGroup, ToggleButton, Divider, Button } from '@mui/material';
+import { FormatAlignLeft, FormatAlignCenter, FormatAlignRight, DeleteOutline } from '@mui/icons-material';
 
-const Sidebar = () => {
-    const { logout, user } = useAuth();
-    const location = useLocation();
-    const navigate = useNavigate();
+const PropertiesSidebar = ({ selectedElement, onUpdate, onDelete }) => {
+  if (!selectedElement) {
+    return <Box sx={{ width: 300, p: 3, textAlign: 'center' }}><Typography variant="body2" color="textSecondary">Select an element to edit properties</Typography></Box>;
+  }
 
-    const menuItems = [
-        { name: 'Dashboard', path: '/dashboard', icon: 'bi-speedometer2' },
-        { name: 'My Templates', path: '/templates', icon: 'bi-folder' },
-        { name: 'New Design', path: '/editor', icon: 'bi-plus-square' },
-    ];
+  return (
+    <Box sx={{ width: 300, bgcolor: 'white', borderLeft: '1px solid #ddd', p: 3, overflowY: 'auto' }}>
+      <Typography variant="h6" sx={{ fontSize: '0.9rem', fontWeight: 'bold', mb: 2 }}>
+        PROPERTY SETTINGS ({selectedElement.type.toUpperCase()})
+      </Typography>
+      <Divider sx={{ mb: 3 }} />
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+      {/* COMMON: Content Editor */}
+      <TextField
+        fullWidth label={selectedElement.type === 'image' ? "Image URL" : "Content"}
+        multiline={selectedElement.type === 'text'} rows={3}
+        value={selectedElement.content}
+        onChange={(e) => onUpdate({ content: e.target.value })}
+        sx={{ mb: 3 }}
+      />
 
-    return (
-        <div className="d-flex flex-column flex-shrink-0 p-3 text-white shadow" 
-             style={{ width: '250px', backgroundColor: 'var(--primary-theme)', height: '100vh' }}>
-            
-            <Link to="/dashboard" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                <span className="fs-4 fw-bold">Builder Portal</span>
-            </Link>
-            <hr />
-            
-            <ul className="nav nav-pills flex-column mb-auto">
-                {menuItems.map((item) => (
-                    <li key={item.path} className="nav-item mb-2">
-                        <Link 
-                            to={item.path} 
-                            className={`nav-link text-white d-flex align-items-center ${location.pathname === item.path ? 'active bg-white text-dark shadow-sm' : ''}`}
-                            style={location.pathname === item.path ? { color: 'var(--primary-theme) !important', fontWeight: 'bold' } : {}}
-                        >
-                            <i className={`bi ${item.icon} me-2`}></i>
-                            {item.name}
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-            
-            <hr />
-            <div className="dropdown">
-                <div className="d-flex align-items-center text-white text-decoration-none small mb-3">
-                    <strong>{user?.name}</strong>
-                </div>
-                <button onClick={handleLogout} className="btn btn-sm btn-outline-light w-100 fw-bold">
-                    Log Out
-                </button>
-            </div>
-        </div>
-    );
+      {/* TEXT SPECIFIC: Alignment & Font Size */}
+      {selectedElement.type === 'text' && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="caption" display="block" gutterBottom>Text Alignment</Typography>
+          <ToggleButtonGroup
+            value={selectedElement.styles.textAlign} exclusive size="small"
+            onChange={(e, val) => val && onUpdate({ styles: { ...selectedElement.styles, textAlign: val } })}
+          >
+            <ToggleButton value="left"><FormatAlignLeft /></ToggleButton>
+            <ToggleButton value="center"><FormatAlignCenter /></ToggleButton>
+            <ToggleButton value="right"><FormatAlignRight /></ToggleButton>
+          </ToggleButtonGroup>
+
+          <Typography variant="caption" display="block" sx={{ mt: 3 }}>Font Size ({selectedElement.styles.fontSize}px)</Typography>
+          <Slider 
+            value={selectedElement.styles.fontSize} min={12} max={48} 
+            onChange={(e, val) => onUpdate({ styles: { ...selectedElement.styles, fontSize: val } })} 
+          />
+        </Box>
+      )}
+
+      {/* IMAGE SPECIFIC: Border Radius */}
+      {selectedElement.type === 'image' && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="caption" display="block">Corner Rounding (Border Radius)</Typography>
+          <Slider 
+            value={selectedElement.styles.borderRadius || 0} min={0} max={100} 
+            onChange={(e, val) => onUpdate({ styles: { ...selectedElement.styles, borderRadius: val } })} 
+          />
+        </Box>
+      )}
+
+      <Button fullWidth variant="outlined" color="error" startIcon={<DeleteOutline />} onClick={onDelete} sx={{ mt: 4 }}>
+        Delete Element
+      </Button>
+    </Box>
+  );
 };
 
-export default Sidebar;
+export default PropertiesSidebar;

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useLocation } from 'react-router-dom';
 
 // Components & Layouts
 import Sidebar from "./components/Editor/Sidebar";
@@ -31,14 +32,20 @@ const ProtectedRoute = ({ children }) => {
 };
 
 
-const DashboardLayout = ({ children }) => (
-  <div className="d-flex">
-    <Sidebar />
-    <div className="flex-grow-1 overflow-auto vh-100 bg-light">
-      {children}
-    </div>
-  </div>
-);
+const DashboardLayout = ({ children }) => {
+  const location = useLocation();
+  const isEditor = location.pathname.startsWith('/editor');
+
+  return (
+    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      {!isEditor && <Sidebar />} 
+      
+      <Box sx={{ flexGrow: 1, bgcolor: '#f9f9f9', overflowY: 'auto' }}>
+        {children}
+      </Box>
+    </Box>
+  );
+};
 
 function App() {
   return (
