@@ -36,7 +36,7 @@ cd email-template-builder
 
 ```bash
 cd server
-nodemon server.ts
+npm start
 ```
 
 Server runs at **http://localhost:5000**
