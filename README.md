@@ -9,7 +9,9 @@ A full-stack drag-and-drop email template builder with React + TypeScript on the
 
 ## Environment Setup
 
-Create a `.env` file inside the `server/` directory:
+Create a `.env` file inside the `server/` directory: and in `client/` directory
+
+**In Server Env file**
 
 ```env
 PORT=5000
@@ -21,6 +23,12 @@ DB_PORT=5432
 JWT_SECRET=your_jwt_secret
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_email_app_password
+```
+
+**In Client Env file**
+
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ## Installation & Running
@@ -36,10 +44,11 @@ cd email-template-builder
 
 ```bash
 cd server
+npm install
 npm start
 ```
 
-Server runs at **http://localhost:5000**
+Server runs at **<http://localhost:5000>**
 
 ### 3. Client
 
@@ -49,7 +58,7 @@ npm install
 npm run dev
 ```
 
-Client runs at **http://localhost:5173**
+Client runs at **<http://localhost:3000>**
 
 ## Tech Stack
 

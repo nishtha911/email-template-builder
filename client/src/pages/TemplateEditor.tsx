@@ -8,7 +8,8 @@ import {
   TextFields, Image as ImageIcon, Visibility, Close,
   ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule,
   ViewModule,
-  PermMedia
+  PermMedia,
+  SmartToy
 } from '@mui/icons-material';
 import { Tabs, Tab } from '@mui/material';
 import {
@@ -20,6 +21,7 @@ import { CSS } from '@dnd-kit/utilities';
 import PropertiesSidebar from '../components/Editor/PropertiesSidebar';
 import { saveTemplate, fetchTemplates } from '../api/index';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { red } from '@mui/material/colors';
 
 interface ElementStyles {
   fontSize?: number;
@@ -156,6 +158,29 @@ const TemplateEditor: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(0);
+
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiMessages, setAiMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  
+  const handleAiSend = () => {
+    if (!aiPrompt.trim()) return;
+  
+    const userMessage = { role: "user" as const, text: aiPrompt };
+  
+    setAiMessages((prev) => [...prev, userMessage]);
+  
+    // Simulated AI response (replace with API call)
+    setTimeout(() => {
+      const aiResponse = {
+        role: "ai" as const,
+        text: "Here is a generated email section. You can drag it into the canvas.",
+      };
+  
+      setAiMessages((prev) => [...prev, aiResponse]);
+    }, 800);
+  
+    setAiPrompt("");
+  };
 
   const { isOver } = useDroppable({ id: 'canvas-droppable' });
 
@@ -345,8 +370,7 @@ const TemplateEditor: React.FC = () => {
 
         <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           <Box sx={{
-            width: 250, p: 0, pt: 1,
-            borderRight: '1px solid rgba(var(--primary-rgb),0.1)',
+            width: 280, p: 0, pt: 0,
             background: 'rgba(var(--bg-paper-rgb),0.5)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
@@ -382,9 +406,23 @@ const TemplateEditor: React.FC = () => {
                 },
               }}
             >
-              <Tab icon={<ViewModule fontSize="small" />} iconPosition="start" label="Elements" />
-              <Tab icon={<PermMedia fontSize="small" />} iconPosition="start" label="Media" />
+              <Tab
+                aria-label="Elements" 
+                icon={<ViewModule fontSize="small" />} 
+                iconPosition="start" 
+              />
+              <Tab 
+                aria-label="Media" 
+                icon={<PermMedia fontSize="small" />}
+                iconPosition="start" 
+              />
+              <Tab 
+                aria-label="AI Assistant" 
+                icon={<SmartToy fontSize="small" />} 
+                iconPosition="start" 
+              />
             </Tabs>
+
 
             <Box sx={{ width: '100%', px: 1.5, display: activeTab === 0 ? 'block' : 'none' }}>
               <DraggableTool type="text" icon={<TextFields fontSize="small" />} label="Text" />
@@ -401,6 +439,114 @@ const TemplateEditor: React.FC = () => {
                <Box sx={{ width: '100%', aspectRatio: '1/1', background: 'rgba(var(--primary-rgb), 0.1)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                  <ImageIcon sx={{ color: 'var(--primary-main)', opacity: 0.5 }} />
                </Box>
+            </Box>
+
+            <Box
+              sx={{
+                height: "100%",
+                display: activeTab === 2 ? "flex" : "none", p : 2,
+                flexDirection: "column",
+                flexWrap : "wrap"
+              }}
+            >
+              {/* Chat Area */}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  px: 1,
+                  pb: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                }}
+              >
+                {aiMessages.length === 0 && (
+                  <Typography
+                    sx={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                      textAlign: "center",
+                      mt: 2,
+                    }}
+                  >
+                    Ask AI to generate email content, sections, or ideas.
+                  </Typography>
+                )}
+
+                {aiMessages.map((msg, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                      maxWidth: "85%",
+                      p: 1,
+                      borderRadius: "10px",
+                      fontSize: "0.78rem",
+                      background:
+                        msg.role === "user"
+                          ? "rgba(var(--primary-rgb),0.12)"
+                          : "rgba(var(--bg-paper-rgb),0.7)",
+                      border:
+                        msg.role === "user"
+                          ? "1px solid rgba(var(--primary-rgb),0.3)"
+                          : "1px solid rgba(var(--primary-rgb),0.15)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    {msg.text}
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Input Row */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  pt: 1,
+                  borderTop: "1px solid rgba(var(--primary-rgb),0.15)",
+                }}
+              >
+                <TextField
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Ask AI to generate email..."
+                  size="small"
+                  fullWidth
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAiSend();
+                    }
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "10px",
+                      fontSize: "0.8rem",
+                      background: "rgba(var(--bg-paper-rgb),0.7)",
+                      backdropFilter: "blur(6px)",
+                    },
+                  }}
+                />
+
+                <IconButton
+                  onClick={handleAiSend}
+                  sx={{
+                    background:
+                      "linear-gradient(135deg,var(--primary-main),var(--primary-light))",
+                    color: "white",
+                    width: 36,
+                    height: 36,
+                    "&:hover": {
+                      opacity: 0.9,
+                    },
+                  }}
+                >
+                  <SmartToy fontSize="small" />
+                </IconButton>
+              </Box>
             </Box>
           </Box>
 
