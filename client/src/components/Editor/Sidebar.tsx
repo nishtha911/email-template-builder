@@ -7,13 +7,16 @@ import {
 import {
   Dashboard as DashboardIcon, LibraryBooks as TemplatesIcon,
   AddBox as CreateIcon, ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon, Logout as LogoutIcon
+  ChevronRight as ChevronRightIcon, Logout as LogoutIcon,
+  DarkMode as DarkModeIcon, LightMode as LightModeIcon
 } from '@mui/icons-material';
 import { useAuth } from './../../context/AuthContext';
+import { useCustomTheme } from './../../context/ThemeContext';
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const { logout, user } = useAuth();
+  const { mode, toggleTheme } = useCustomTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,11 +38,11 @@ const Sidebar = () => {
           transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
           overflowX: 'hidden',
           border: 'none',
-          background: 'rgba(255,255,255,0.6)',
+          background: 'rgba(var(--bg-paper-rgb),0.6)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderRight: '1px solid rgba(150,57,145,0.1)',
-          boxShadow: '4px 0 24px rgba(150,57,145,0.07)',
+          borderRight: '1px solid rgba(var(--primary-rgb),0.1)',
+          boxShadow: '4px 0 24px rgba(var(--primary-rgb),0.07)',
         },
       }}
     >
@@ -47,15 +50,15 @@ const Sidebar = () => {
         display: 'flex', alignItems: 'center',
         justifyContent: open ? 'space-between' : 'center',
         px: open ? 2.5 : 1, py: 2.5, minHeight: 72,
-        borderBottom: '1px solid rgba(150,57,145,0.08)',
+        borderBottom: '1px solid rgba(var(--primary-rgb),0.08)',
       }}>
         {open && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
             <Box sx={{
               width: 32, height: 32, borderRadius: '9px',
-              background: 'linear-gradient(135deg, #963991, #c060bb)',
+              background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 3px 10px rgba(150,57,145,0.3)',
+              boxShadow: '0 3px 10px rgba(var(--primary-rgb),0.3)',
               flexShrink: 0,
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -63,7 +66,7 @@ const Sidebar = () => {
                 <path d="m22 7-10 7L2 7" />
               </svg>
             </Box>
-            <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#1a1a2e', letterSpacing: '0.3px' }}>
+            <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', letterSpacing: '0.3px' }}>
               BUILDER
             </Typography>
           </Box>
@@ -72,10 +75,10 @@ const Sidebar = () => {
           onClick={() => setOpen(!open)}
           size="small"
           sx={{
-            color: '#963991',
-            background: 'rgba(150,57,145,0.07)',
+            color: 'var(--primary-main)',
+            background: 'rgba(var(--primary-rgb),0.07)',
             borderRadius: '8px',
-            '&:hover': { background: 'rgba(150,57,145,0.14)' },
+            '&:hover': { background: 'rgba(var(--primary-rgb),0.14)' },
           }}
         >
           {open ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
@@ -85,18 +88,18 @@ const Sidebar = () => {
       {open && user && (
         <Box sx={{
           mx: 2, mt: 2, mb: 1, p: 1.5, borderRadius: '12px',
-          background: 'linear-gradient(135deg, rgba(150,57,145,0.08), rgba(150,57,145,0.04))',
-          border: '1px solid rgba(150,57,145,0.1)',
+          background: 'linear-gradient(135deg, rgba(var(--primary-rgb),0.08), rgba(var(--primary-rgb),0.04))',
+          border: '1px solid rgba(var(--primary-rgb),0.1)',
           display: 'flex', alignItems: 'center', gap: 1.5,
         }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: '#963991', fontSize: '0.8rem', fontWeight: 700 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: 'var(--primary-main)', fontSize: '0.8rem', fontWeight: 700 }}>
             {user.name?.charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ overflow: 'hidden' }}>
-            <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#1a1a2e', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user.name}
             </Typography>
-            <Typography sx={{ fontSize: '0.72rem', color: '#963991', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: '0.72rem', color: 'var(--primary-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user.email}
             </Typography>
           </Box>
@@ -106,7 +109,7 @@ const Sidebar = () => {
       {!open && user && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 1 }}>
           <Tooltip title={user.name} placement="right">
-            <Avatar sx={{ width: 34, height: 34, bgcolor: '#963991', fontSize: '0.8rem', fontWeight: 700 }}>
+            <Avatar sx={{ width: 34, height: 34, bgcolor: 'var(--primary-main)', fontSize: '0.8rem', fontWeight: 700 }}>
               {user.name?.charAt(0).toUpperCase()}
             </Avatar>
           </Tooltip>
@@ -127,13 +130,13 @@ const Sidebar = () => {
                     justifyContent: open ? 'initial' : 'center',
                     px: open ? 1.8 : 1.2,
                     background: active
-                      ? 'linear-gradient(135deg, rgba(150,57,145,0.15), rgba(150,57,145,0.08))'
+                      ? 'linear-gradient(135deg, rgba(var(--primary-rgb),0.15), rgba(var(--primary-rgb),0.08))'
                       : 'transparent',
-                    border: active ? '1px solid rgba(150,57,145,0.18)' : '1px solid transparent',
+                    border: active ? '1px solid rgba(var(--primary-rgb),0.18)' : '1px solid transparent',
                     '&:hover': {
                       background: active
-                        ? 'linear-gradient(135deg, rgba(150,57,145,0.2), rgba(150,57,145,0.12))'
-                        : 'rgba(150,57,145,0.06)',
+                        ? 'linear-gradient(135deg, rgba(var(--primary-rgb),0.2), rgba(var(--primary-rgb),0.12))'
+                        : 'rgba(var(--primary-rgb),0.06)',
                     },
                     transition: 'all 0.2s',
                   }}
@@ -141,7 +144,7 @@ const Sidebar = () => {
                   <ListItemIcon sx={{
                     minWidth: 0,
                     mr: open ? 1.5 : 'auto',
-                    color: active ? '#963991' : '#888',
+                    color: active ? 'var(--primary-main)' : 'var(--text-secondary)',
                     transition: 'color 0.2s',
                   }}>
                     {item.icon}
@@ -151,7 +154,7 @@ const Sidebar = () => {
                     primaryTypographyProps={{
                       fontSize: '0.88rem',
                       fontWeight: active ? 700 : 500,
-                      color: active ? '#963991' : '#444',
+                      color: active ? 'var(--primary-main)' : 'var(--text-primary)',
                     }}
                     sx={{ opacity: open ? 1 : 0, transition: 'opacity 0.2s' }}
                   />
@@ -162,7 +165,32 @@ const Sidebar = () => {
         })}
       </List>
 
-      <Box sx={{ p: 1.5, borderTop: '1px solid rgba(150,57,145,0.08)' }}>
+      <Box sx={{ p: 1.5, borderTop: '1px solid rgba(var(--primary-rgb),0.08)' }}>
+        <Tooltip title={!open ? 'Toggle Theme' : ''} placement="right">
+          <ListItemButton
+            onClick={toggleTheme}
+            sx={{
+              borderRadius: '11px',
+              justifyContent: open ? 'initial' : 'center',
+              px: open ? 1.8 : 1.2,
+              minHeight: 44,
+              mb: 1,
+              border: '1px solid transparent',
+              '&:hover': { background: 'rgba(var(--primary-rgb),0.06)' },
+              transition: 'all 0.2s',
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 0, mr: open ? 1.5 : 'auto', color: 'var(--text-secondary)' }}>
+              {mode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
+            </ListItemIcon>
+            <ListItemText
+              primary={mode === 'light' ? 'Dark Mode' : 'Light Mode'}
+              primaryTypographyProps={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+              sx={{ opacity: open ? 1 : 0, transition: 'opacity 0.2s' }}
+            />
+          </ListItemButton>
+        </Tooltip>
+
         <Tooltip title={!open ? 'Logout' : ''} placement="right">
           <ListItemButton
             onClick={logout}
@@ -171,7 +199,7 @@ const Sidebar = () => {
               justifyContent: open ? 'initial' : 'center',
               px: open ? 1.8 : 1.2,
               minHeight: 44,
-              border: '1px solid rgba(150,57,145,0.12)',
+              border: '1px solid rgba(var(--primary-rgb),0.12)',
               '&:hover': { background: 'rgba(220,38,38,0.06)', borderColor: 'rgba(220,38,38,0.2)' },
               transition: 'all 0.2s',
             }}

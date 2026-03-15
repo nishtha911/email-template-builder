@@ -6,8 +6,9 @@ import {
 } from '@mui/material';
 import {
   TextFields, Image as ImageIcon, Visibility, Close,
-  ArrowBack, DragIndicator
+  ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule
 } from '@mui/icons-material';
+import { Tabs, Tab } from '@mui/material';
 import {
   DndContext, useDraggable, useDroppable,
   PointerSensor, useSensor, useSensors, DragOverlay,
@@ -36,7 +37,7 @@ interface ElementStyles {
 
 interface CanvasElement {
   id: string;
-  type: 'text' | 'image';
+  type: 'text' | 'image' | 'button' | 'divider';
   content: string;
   styles: ElementStyles;
 }
@@ -83,22 +84,22 @@ const DraggableTool: React.FC<DraggableToolProps> = ({ type, icon, label }) => {
       }}
       sx={{
         p: 1.5, mb: 1.5, borderRadius: '12px',
-        border: '1px solid rgba(150,57,145,0.15)',
-        background: 'rgba(255,255,255,0.7)',
+        border: '1px solid rgba(var(--primary-rgb),0.15)',
+        background: 'rgba(var(--bg-paper-rgb),0.7)',
         backdropFilter: 'blur(8px)',
         cursor: 'grab',
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
         transition: 'all 0.15s',
         '&:hover': {
-          background: 'rgba(150,57,145,0.06)',
-          border: '1px solid rgba(150,57,145,0.3)',
+          background: 'rgba(var(--primary-rgb),0.06)',
+          border: '1px solid rgba(var(--primary-rgb),0.3)',
           transform: 'translateY(-1px)',
-          boxShadow: '0 4px 12px rgba(150,57,145,0.12)',
+          boxShadow: '0 4px 12px rgba(var(--primary-rgb),0.12)',
         },
       }}
     >
-      <Box sx={{ color: '#963991' }}>{icon}</Box>
-      <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: '#963991', letterSpacing: '0.3px' }}>
+      <Box sx={{ color: 'var(--primary-main)' }}>{icon}</Box>
+      <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary-main)', letterSpacing: '0.3px' }}>
         {label}
       </Typography>
     </Box>
@@ -113,14 +114,14 @@ const DroppableCanvas: React.FC<DroppableCanvasProps> = ({ children, isOver, isE
       ref={setNodeRef}
       sx={{
         width: '100%', maxWidth: 640, minHeight: '80vh', mx: 'auto',
-        background: 'rgba(255,255,255,0.85)',
+        background: 'rgba(var(--bg-paper-rgb),0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         p: 4, borderRadius: '20px',
         boxShadow: isOver
-          ? '0 0 0 3px #963991, 0 8px 40px rgba(150,57,145,0.18)'
-          : '0 8px 40px rgba(150,57,145,0.1), 0 1px 4px rgba(0,0,0,0.04)',
-        border: isOver ? '2px solid #963991' : '1px solid rgba(255,255,255,0.9)',
+          ? '0 0 0 3px var(--primary-main), 0 8px 40px rgba(var(--primary-rgb),0.18)'
+          : '0 8px 40px rgba(var(--primary-rgb),0.1), 0 1px 4px rgba(0,0,0,0.04)',
+        border: isOver ? '2px solid var(--primary-main)' : '1px solid rgba(var(--bg-paper-rgb),0.9)',
         transition: 'all 0.2s ease',
         boxSizing: 'border-box',
       }}
@@ -131,9 +132,9 @@ const DroppableCanvas: React.FC<DroppableCanvasProps> = ({ children, isOver, isE
           alignItems: 'center', justifyContent: 'center',
           opacity: 0.3, pointerEvents: 'none', gap: 1,
         }}>
-          <DragIndicator sx={{ fontSize: 36, color: '#963991' }} />
-          <Typography sx={{ fontWeight: 600, color: '#963991' }}>Drop elements here</Typography>
-          <Typography sx={{ fontSize: '0.8rem', color: '#888' }}>Drag Text or Image from the left panel</Typography>
+          <DragIndicator sx={{ fontSize: 36, color: 'var(--primary-main)' }} />
+          <Typography sx={{ fontWeight: 600, color: 'var(--primary-main)' }}>Drop elements here</Typography>
+          <Typography sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Drag Text or Image from the left panel</Typography>
         </Box>
       )}
       {children}
@@ -152,6 +153,7 @@ const TemplateEditor: React.FC = () => {
   const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(0);
 
   const { isOver } = useDroppable({ id: 'canvas-droppable' });
 
@@ -180,20 +182,22 @@ const TemplateEditor: React.FC = () => {
     const { active, over } = event;
     setActiveType(null);
     if (!over || over.id !== 'canvas-droppable') return;
-    const type = active.data.current?.type as 'text' | 'image';
+    const type = active.data.current?.type as 'text' | 'image' | 'button' | 'divider';
     if (!type) return;
 
     const newElement: CanvasElement = {
       id: `el-${Date.now()}`,
       type,
       content:
-        type === 'text'
-          ? 'Placeholder Text'
-          : 'https://community.softr.io/uploads/db9110/original/2X/7/74e6e7e382d0ff5d7773ca9a87e6f6f8817a68a6.jpeg',
+        type === 'text' ? 'Placeholder Text'
+          : type === 'image' ? 'https://community.softr.io/uploads/db9110/original/2X/7/74e6e7e382d0ff5d7773ca9a87e6f6f8817a68a6.jpeg'
+          : type === 'button' ? 'Click Me'
+          : '',
       styles:
-        type === 'text'
-          ? { fontSize: 18, textAlign: 'left', color: '#333333', fontFamily: 'Arial', fontWeight: '400', fontStyle: 'normal', textDecoration: 'none' }
-          : { borderRadius: 0, width: '100%', display: 'block', marginLeft: '0', marginRight: 'auto' }
+        type === 'text' ? { fontSize: 18, textAlign: 'left', color: '#333333', fontFamily: 'Arial', fontWeight: '400', fontStyle: 'normal', textDecoration: 'none' }
+          : type === 'image' ? { borderRadius: 0, width: '100%', display: 'block', marginLeft: '0', marginRight: 'auto' }
+          : type === 'button' ? { fontSize: 16, textAlign: 'center', color: '#ffffff', backgroundColor: '#4f46e5', padding: '10px 20px', borderRadius: 4, display: 'inline-block', fontWeight: 'bold' }
+          : { borderTop: '2px solid #dddddd', width: '100%', margin: '15px 0' }
     };
 
     setElements((prev) => [...prev, newElement]);
@@ -220,32 +224,60 @@ const TemplateEditor: React.FC = () => {
     }
   };
 
+  const handleExportHTML = () => {
+    let htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#f5f5f5;}</style></head><body><div style="max-width:600px;margin:0 auto;background:#fff;padding:20px;">`;
+    elements.forEach(el => {
+      const styles = Object.entries(el.styles)
+        .map(([k, v]) => `${k.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}:${v}`)
+        .join(';');
+      if (el.type === 'image') {
+        htmlContent += `<img src="${el.content}" style="${styles};width:100%;max-width:100%;display:block;" />`;
+      } else if (el.type === 'divider') {
+        htmlContent += `<hr style="${styles}" />`;
+      } else if (el.type === 'button') {
+        htmlContent += `<div style="text-align:${el.styles.textAlign || 'center'};"><a href="#" style="text-decoration:none;${styles}">${renderPreviewContent(el.content)}</a></div>`;
+      } else {
+        htmlContent += `<div style="${styles}">${renderPreviewContent(el.content)}</div>`;
+      }
+    });
+    htmlContent += `</div></body></html>`;
+    
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${templateTitle.replace(/\s+/g, '_')}.html`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setSnackbar({ open: true, message: 'Template exported as HTML.', severity: 'success' });
+  };
+
   const renderPreviewContent = (content: string) =>
-    content.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => `<span style="color:#963991;font-weight:700;">[${key}]</span>`);
+    content.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => `<span style="color:var(--primary-main);font-weight:700;">[${key}]</span>`);
 
   const selectedElement = elements.find((e) => e.id === selectedId);
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(145deg, #faf5ff 0%, #fdf4ff 60%, #f3e8ff 100%)' }}>
+      <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(145deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 60%, var(--bg-gradient-3) 100%)' }}>
 
         <AppBar position="static" elevation={0} sx={{
-          background: 'rgba(255,255,255,0.7)',
+          background: 'rgba(var(--bg-paper-rgb),0.7)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(150,57,145,0.1)',
+          borderBottom: '1px solid rgba(var(--primary-rgb),0.1)',
           color: 'black',
         }}>
           <Toolbar sx={{ justifyContent: 'space-between', minHeight: '60px !important' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Tooltip title="Back to templates">
-                <IconButton size="small" onClick={() => navigate('/templates')} sx={{ color: '#963991' }}>
+                <IconButton size="small" onClick={() => navigate('/templates')} sx={{ color: 'var(--primary-main)' }}>
                   <ArrowBack fontSize="small" />
                 </IconButton>
               </Tooltip>
               <Box sx={{
                 width: 28, height: 28, borderRadius: '8px',
-                background: 'linear-gradient(135deg, #963991, #c060bb)',
+                background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -260,7 +292,7 @@ const TemplateEditor: React.FC = () => {
                 slotProps={{
                   input: {
                     disableUnderline: true,
-                    sx: { fontWeight: 800, fontSize: '0.95rem', color: '#1a1a2e' }
+                    sx: { fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }
                   }
                 }}
               />
@@ -270,28 +302,40 @@ const TemplateEditor: React.FC = () => {
                 startIcon={<Visibility sx={{ fontSize: 17 }} />}
                 onClick={() => setIsPreviewOpen(true)}
                 sx={{
-                  color: '#963991', fontWeight: 600, fontSize: '0.85rem', textTransform: 'none',
+                  color: 'var(--primary-main)', fontWeight: 600, fontSize: '0.85rem', textTransform: 'none',
                   borderRadius: '10px', px: 2,
-                  border: '1px solid rgba(150,57,145,0.2)',
-                  '&:hover': { background: 'rgba(150,57,145,0.06)' },
+                  border: '1px solid rgba(var(--primary-rgb),0.2)',
+                  '&:hover': { background: 'rgba(var(--primary-rgb),0.06)' },
                 }}
               >
                 Preview
+              </Button>
+              <Button
+                startIcon={<FileDownload sx={{ fontSize: 17 }} />}
+                onClick={handleExportHTML}
+                sx={{
+                  color: 'var(--primary-main)', fontWeight: 600, fontSize: '0.85rem', textTransform: 'none',
+                  borderRadius: '10px', px: 2,
+                  border: '1px solid rgba(var(--primary-rgb),0.2)',
+                  '&:hover': { background: 'rgba(var(--primary-rgb),0.06)' },
+                }}
+              >
+                Export
               </Button>
               <Button
                 variant="contained"
                 onClick={handleSave}
                 disabled={saving}
                 sx={{
-                  background: 'linear-gradient(135deg, #963991, #b84db3)',
+                  background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
                   fontWeight: 700, fontSize: '0.85rem', textTransform: 'none',
                   borderRadius: '10px', px: 2.5, minWidth: 90,
-                  boxShadow: '0 4px 14px rgba(150,57,145,0.3)',
-                  '&:hover': { boxShadow: '0 6px 18px rgba(150,57,145,0.4)' },
-                  '&.Mui-disabled': { background: '#d4a8d2', color: 'white' },
+                  boxShadow: '0 4px 14px rgba(var(--primary-rgb),0.3)',
+                  '&:hover': { boxShadow: '0 6px 18px rgba(var(--primary-rgb),0.4)' },
+                  '&.Mui-disabled': { background: '#d4a8d2', color: 'var(--bg-paper-solid)' },
                 }}
               >
-                {saving ? <CircularProgress size={18} sx={{ color: 'white' }} /> : 'Save'}
+                {saving ? <CircularProgress size={18} sx={{ color: 'var(--bg-paper-solid)' }} /> : 'Save'}
               </Button>
             </Stack>
           </Toolbar>
@@ -299,18 +343,39 @@ const TemplateEditor: React.FC = () => {
 
         <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           <Box sx={{
-            width: 110, p: 1.5, pt: 2,
-            borderRight: '1px solid rgba(150,57,145,0.1)',
-            background: 'rgba(255,255,255,0.5)',
+            width: 130, p: 0, pt: 1,
+            borderRight: '1px solid rgba(var(--primary-rgb),0.1)',
+            background: 'rgba(var(--bg-paper-rgb),0.5)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0,
           }}>
-            <Typography sx={{ fontSize: '0.65rem', fontWeight: 800, color: '#bbb', letterSpacing: '1px', mb: 1.5, textTransform: 'uppercase' }}>
-              Elements
-            </Typography>
-            <DraggableTool type="text" icon={<TextFields fontSize="small" />} label="Text" />
-            <DraggableTool type="image" icon={<ImageIcon fontSize="small" />} label="Image" />
+            <Tabs 
+              value={activeTab} 
+              onChange={(e, v) => setActiveTab(v)} 
+              variant="fullWidth" 
+              sx={{ width: '100%', mb: 2, minHeight: 40, '& .MuiTab-root': { minHeight: 40, fontSize: '0.7rem', fontWeight: 700 } }}
+            >
+              <Tab label="Elements" />
+              <Tab label="Media" />
+            </Tabs>
+
+            <Box sx={{ width: '100%', px: 1.5, display: activeTab === 0 ? 'block' : 'none' }}>
+              <DraggableTool type="text" icon={<TextFields fontSize="small" />} label="Text" />
+              <DraggableTool type="image" icon={<ImageIcon fontSize="small" />} label="Image" />
+              <DraggableTool type="button" icon={<SmartButton fontSize="small" />} label="Button" />
+              <DraggableTool type="divider" icon={<HorizontalRule fontSize="small" />} label="Divider" />
+            </Box>
+
+            <Box sx={{ width: '100%', px: 1.5, display: activeTab === 1 ? 'block' : 'none', textAlign: 'center' }}>
+               <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)', mb: 2 }}>
+                 Upload and manage your assets here.
+               </Typography>
+               <Button variant="outlined" size="small" sx={{ width: '100%', fontSize: '0.7rem', mb: 2 }}>Upload Image</Button>
+               <Box sx={{ width: '100%', aspectRatio: '1/1', background: 'rgba(var(--primary-rgb), 0.1)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <ImageIcon sx={{ color: 'var(--primary-main)', opacity: 0.5 }} />
+               </Box>
+            </Box>
           </Box>
 
           <Box
@@ -324,16 +389,22 @@ const TemplateEditor: React.FC = () => {
                   onClick={(e) => { e.stopPropagation(); setSelectedId(el.id); }}
                   sx={{
                     mb: 2, p: 1, cursor: 'pointer', borderRadius: '8px',
-                    outline: selectedId === el.id ? '2px solid #963991' : '2px solid transparent',
+                    outline: selectedId === el.id ? '2px solid var(--primary-main)' : '2px solid transparent',
                     outlineOffset: '2px',
                     transition: 'outline 0.15s',
-                    '&:hover': { outline: selectedId === el.id ? '2px solid #963991' : '2px solid rgba(150,57,145,0.3)' },
+                    '&:hover': { outline: selectedId === el.id ? '2px solid var(--primary-main)' : '2px solid rgba(var(--primary-rgb),0.3)' },
                   }}
                 >
                   {el.type === 'text' && <Typography sx={el.styles as object}>{el.content}</Typography>}
                   {el.type === 'image' && (
                     <Box component="img" src={el.content} sx={{ width: '100%', borderRadius: `${el.styles.borderRadius ?? 0}px` }} />
                   )}
+                  {el.type === 'button' && (
+                    <Box sx={{ textAlign: el.styles.textAlign || 'center' }}>
+                      <Box component="span" sx={{ ...el.styles as object }}>{el.content}</Box>
+                    </Box>
+                  )}
+                  {el.type === 'divider' && <Box component="hr" sx={el.styles as object} />}
                 </Box>
               ))}
             </DroppableCanvas>
@@ -341,8 +412,8 @@ const TemplateEditor: React.FC = () => {
 
           <Box sx={{
             width: 300, flexShrink: 0,
-            borderLeft: '1px solid rgba(150,57,145,0.1)',
-            background: 'rgba(255,255,255,0.55)',
+            borderLeft: '1px solid rgba(var(--primary-rgb),0.1)',
+            background: 'rgba(var(--bg-paper-rgb),0.55)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             overflowY: 'auto',
@@ -371,17 +442,17 @@ const TemplateEditor: React.FC = () => {
         {activeType && (
           <Box sx={{
             p: 1.5, width: 90, borderRadius: '12px',
-            background: 'rgba(255,255,255,0.95)',
+            background: 'rgba(var(--bg-paper-rgb),0.95)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(150,57,145,0.3)',
-            boxShadow: '0 8px 32px rgba(150,57,145,0.2)',
+            border: '1px solid rgba(var(--primary-rgb),0.3)',
+            boxShadow: '0 8px 32px rgba(var(--primary-rgb),0.2)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
             cursor: 'grabbing',
           }}>
-            <Box sx={{ color: '#963991' }}>
+            <Box sx={{ color: 'var(--primary-main)' }}>
               {activeType === 'text' ? <TextFields fontSize="small" /> : <ImageIcon fontSize="small" />}
             </Box>
-            <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: '#963991' }}>
+            <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary-main)' }}>
               {activeType.toUpperCase()}
             </Typography>
           </Box>
@@ -392,26 +463,26 @@ const TemplateEditor: React.FC = () => {
         <Box sx={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
           width: 580, maxHeight: '85vh', overflow: 'auto',
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(var(--bg-paper-rgb),0.92)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           p: 4, borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.9)',
-          boxShadow: '0 24px 80px rgba(150,57,145,0.2)',
+          border: '1px solid rgba(var(--bg-paper-rgb),0.9)',
+          boxShadow: '0 24px 80px rgba(var(--primary-rgb),0.2)',
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
-              <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1a1a2e' }}>Preview</Typography>
-              <Typography sx={{ fontSize: '0.78rem', color: '#aaa' }}>{templateTitle}</Typography>
+              <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>Preview</Typography>
+              <Typography sx={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{templateTitle}</Typography>
             </Box>
-            <IconButton onClick={() => setIsPreviewOpen(false)} size="small" sx={{ color: '#963991' }}>
+            <IconButton onClick={() => setIsPreviewOpen(false)} size="small" sx={{ color: 'var(--primary-main)' }}>
               <Close fontSize="small" />
             </IconButton>
           </Box>
-          <Divider sx={{ mb: 2.5, borderColor: 'rgba(150,57,145,0.1)' }} />
+          <Divider sx={{ mb: 2.5, borderColor: 'rgba(var(--primary-rgb),0.1)' }} />
           <Box>
             {elements.length === 0 && (
-              <Typography sx={{ textAlign: 'center', color: '#aaa', py: 4, fontSize: '0.88rem' }}>
+              <Typography sx={{ textAlign: 'center', color: 'var(--text-secondary)', py: 4, fontSize: '0.88rem' }}>
                 No elements to preview.
               </Typography>
             )}
@@ -423,6 +494,12 @@ const TemplateEditor: React.FC = () => {
                 {el.type === 'image' && (
                   <img src={el.content} style={{ width: '100%', borderRadius: `${el.styles.borderRadius ?? 0}px` }} alt="" />
                 )}
+                {el.type === 'button' && (
+                  <div style={{ textAlign: (el.styles as any).textAlign || 'center' }}>
+                    <span style={el.styles as React.CSSProperties} dangerouslySetInnerHTML={{ __html: renderPreviewContent(el.content) }} />
+                  </div>
+                )}
+                {el.type === 'divider' && <hr style={el.styles as React.CSSProperties} />}
               </Box>
             ))}
           </Box>

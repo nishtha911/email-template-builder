@@ -34,7 +34,7 @@ const ResetPassword = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f3e8ff 0%, #fdf4ff 40%, #ede9fe 100%)',
+        background: 'linear-gradient(135deg, var(--bg-gradient-3) 0%, var(--bg-gradient-2) 40%, var(--bg-gradient-3) 100%)',
         p: 2,
       }}
     >
@@ -44,7 +44,7 @@ const ResetPassword = () => {
           sx={{
             borderRadius: '16px',
             overflow: 'hidden',
-            background: 'rgba(255, 255, 255, 0.8)',
+            background: 'rgba(var(--bg-paper-rgb), 0.8)',
             backdropFilter: 'blur(12px)',
           }}
         >

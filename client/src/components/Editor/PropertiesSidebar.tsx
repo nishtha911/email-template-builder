@@ -6,7 +6,7 @@ import {
 import {
   FormatAlignLeft, FormatAlignCenter, FormatAlignRight,
   FormatBold, FormatItalic, FormatUnderlined, DeleteOutline,
-  TextFields, Image as ImageIcon
+  TextFields, Image as ImageIcon, SmartButton, HorizontalRule
 } from '@mui/icons-material';
 
 const FONT_FAMILIES = ['Arial', 'Georgia', 'Helvetica', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'];
@@ -30,7 +30,7 @@ interface ElementStyles {
 
 interface ElementData {
   id: string;
-  type: 'text' | 'image';
+  type: 'text' | 'image' | 'button' | 'divider';
   content: string;
   styles: ElementStyles;
 }
@@ -67,21 +67,21 @@ interface PropertiesSidebarProps {
 const sxField = {
   '& .MuiOutlinedInput-root': {
     borderRadius: '8px', fontSize: '0.85rem',
-    background: 'rgba(255,255,255,0.7)',
-    '& fieldset': { borderColor: 'rgba(150,57,145,0.15)' },
-    '&:hover fieldset': { borderColor: 'rgba(150,57,145,0.3)' },
-    '&.Mui-focused fieldset': { borderColor: '#963991' },
+    background: 'rgba(var(--bg-paper-rgb),0.7)',
+    '& fieldset': { borderColor: 'rgba(var(--primary-rgb),0.15)' },
+    '&:hover fieldset': { borderColor: 'rgba(var(--primary-rgb),0.3)' },
+    '&.Mui-focused fieldset': { borderColor: 'var(--primary-main)' },
   },
 };
 
 const SectionLabel: React.FC<SectionLabelProps> = ({ children }) => (
-  <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, color: '#963991', letterSpacing: '0.8px', textTransform: 'uppercase', mb: 0.8 }}>
+  <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--primary-main)', letterSpacing: '0.8px', textTransform: 'uppercase', mb: 0.8 }}>
     {children}
   </Typography>
 );
 
 const ControlBlock: React.FC<ControlBlockProps> = ({ children }) => (
-  <Box sx={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(150,57,145,0.08)', borderRadius: '12px', p: 1.8 }}>
+  <Box sx={{ background: 'rgba(var(--bg-paper-rgb),0.6)', border: '1px solid rgba(var(--primary-rgb),0.08)', borderRadius: '12px', p: 1.8 }}>
     {children}
   </Box>
 );
@@ -111,7 +111,7 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
           <Select
             value={s.fontFamily || 'Arial'}
             onChange={(e) => onUpdate({ styles: { fontFamily: e.target.value } })}
-            sx={{ borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.7)', '& fieldset': { borderColor: 'rgba(150,57,145,0.15)' } }}
+            sx={{ borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(var(--bg-paper-rgb),0.7)', '& fieldset': { borderColor: 'rgba(var(--primary-rgb),0.15)' } }}
           >
             {FONT_FAMILIES.map((f) => (
               <MenuItem key={f} value={f} style={{ fontFamily: f, fontSize: '0.85rem' }}>{f}</MenuItem>
@@ -124,7 +124,7 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
         <SectionLabel>Font Size — {s.fontSize}px</SectionLabel>
         <Slider value={s.fontSize ?? 18} min={12} max={80}
           onChange={(_e, val) => onUpdate({ styles: { fontSize: val as number } })}
-          sx={{ color: '#963991', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
+          sx={{ color: 'var(--primary-main)', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
       </ControlBlock>
 
       <ControlBlock>
@@ -133,7 +133,7 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
           <Select
             value={s.fontWeight || '400'}
             onChange={(e) => onUpdate({ styles: { fontWeight: e.target.value } })}
-            sx={{ borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.7)', '& fieldset': { borderColor: 'rgba(150,57,145,0.15)' } }}
+            sx={{ borderRadius: '8px', fontSize: '0.85rem', background: 'rgba(var(--bg-paper-rgb),0.7)', '& fieldset': { borderColor: 'rgba(var(--primary-rgb),0.15)' } }}
           >
             {FONT_WEIGHTS.map((w) => (
               <MenuItem key={w} value={w} style={{ fontWeight: parseInt(w), fontSize: '0.85rem' }}>{w}</MenuItem>
@@ -160,33 +160,80 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
       </ControlBlock>
 
       <ControlBlock>
+        <SectionLabel>Background Color</SectionLabel>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <input
+            type="color" value={s.backgroundColor || '#ffffff'}
+            onChange={(e) => onUpdate({ styles: { backgroundColor: e.target.value } })}
+            style={{ width: 36, height: 34, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
+          />
+          <TextField
+            size="small" variant="outlined"
+            value={s.backgroundColor || '#ffffff'}
+            onChange={(e) => onUpdate({ styles: { backgroundColor: e.target.value } })}
+            sx={{ flexGrow: 1, ...sxField }}
+          />
+        </Box>
+      </ControlBlock>
+
+      <ControlBlock>
         <SectionLabel>Style & Alignment</SectionLabel>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <ToggleButtonGroup size="small">
             <ToggleButton value="bold" selected={s.fontWeight === '700' || s.fontWeight === '800'}
               onChange={() => toggleStyle('fontWeight', '700', '400')}
-              sx={{ borderRadius: '8px !important', '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}>
+              sx={{ borderRadius: '8px !important', '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}>
               <FormatBold fontSize="small" />
             </ToggleButton>
             <ToggleButton value="italic" selected={s.fontStyle === 'italic'}
               onChange={() => toggleStyle('fontStyle', 'italic', 'normal')}
-              sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}>
+              sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}>
               <FormatItalic fontSize="small" />
             </ToggleButton>
             <ToggleButton value="underline" selected={s.textDecoration === 'underline'}
               onChange={() => toggleStyle('textDecoration', 'underline', 'none')}
-              sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}>
+              sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}>
               <FormatUnderlined fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
           <ToggleButtonGroup fullWidth exclusive size="small"
             value={s.textAlign}
             onChange={(_e, val) => val && onUpdate({ styles: { textAlign: val } })}>
-            <ToggleButton value="left" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignLeft fontSize="small" /></ToggleButton>
-            <ToggleButton value="center" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignCenter fontSize="small" /></ToggleButton>
-            <ToggleButton value="right" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignRight fontSize="small" /></ToggleButton>
+            <ToggleButton value="left" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignLeft fontSize="small" /></ToggleButton>
+            <ToggleButton value="center" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignCenter fontSize="small" /></ToggleButton>
+            <ToggleButton value="right" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignRight fontSize="small" /></ToggleButton>
           </ToggleButtonGroup>
         </Box>
+      </ControlBlock>
+    </>
+  );
+};
+
+const DividerControls: React.FC<ImageControlsProps> = ({ element, onUpdate }) => {
+  const s = element.styles;
+  return (
+    <>
+      <ControlBlock>
+        <SectionLabel>Color</SectionLabel>
+         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <input
+            type="color" value={s.borderTopColor || '#dddddd'}
+            onChange={(e) => onUpdate({ styles: { borderTop: `2px solid ${e.target.value}`, borderTopColor: e.target.value } })}
+            style={{ width: 36, height: 34, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
+          />
+          <TextField
+            size="small" variant="outlined"
+            value={s.borderTopColor || '#dddddd'}
+            onChange={(e) => onUpdate({ styles: { borderTop: `2px solid ${e.target.value}`, borderTopColor: e.target.value } })}
+            sx={{ flexGrow: 1, ...sxField }}
+          />
+        </Box>
+      </ControlBlock>
+      <ControlBlock>
+        <SectionLabel>Margin (Top/Bottom) — {parseInt(s.margin?.toString() || '15') || 15}px</SectionLabel>
+        <Slider value={parseInt(s.margin?.toString() || '15') || 15} min={0} max={60}
+          onChange={(_e, val) => onUpdate({ styles: { margin: `${val}px 0` } })}
+          sx={{ color: 'var(--primary-main)', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
       </ControlBlock>
     </>
   );
@@ -214,14 +261,14 @@ const ImageControls: React.FC<ImageControlsProps> = ({ element, onUpdate }) => {
         <SectionLabel>Corner Radius — {s.borderRadius}px</SectionLabel>
         <Slider value={s.borderRadius ?? 0} min={0} max={100}
           onChange={(_e, val) => onUpdate({ styles: { borderRadius: val as number } })}
-          sx={{ color: '#963991', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
+          sx={{ color: 'var(--primary-main)', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
       </ControlBlock>
 
       <ControlBlock>
         <SectionLabel>Width — {parseInt(s.width ?? '100') || 100}%</SectionLabel>
         <Slider value={parseInt(s.width ?? '100') || 100} min={20} max={100}
           onChange={(_e, val) => onUpdate({ styles: { width: `${val}%` } })}
-          sx={{ color: '#963991', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
+          sx={{ color: 'var(--primary-main)', '& .MuiSlider-thumb': { width: 14, height: 14 } }} />
       </ControlBlock>
 
       <ControlBlock>
@@ -233,9 +280,9 @@ const ImageControls: React.FC<ImageControlsProps> = ({ element, onUpdate }) => {
             if (val === 'left') onUpdate({ styles: { display: 'block', marginLeft: '0', marginRight: 'auto' } });
             if (val === 'right') onUpdate({ styles: { display: 'block', marginLeft: 'auto', marginRight: '0' } });
           }}>
-          <ToggleButton value="left" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignLeft fontSize="small" /></ToggleButton>
-          <ToggleButton value="center" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignCenter fontSize="small" /></ToggleButton>
-          <ToggleButton value="right" sx={{ '&.Mui-selected': { background: 'rgba(150,57,145,0.12)', color: '#963991' } }}><FormatAlignRight fontSize="small" /></ToggleButton>
+          <ToggleButton value="left" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignLeft fontSize="small" /></ToggleButton>
+          <ToggleButton value="center" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignCenter fontSize="small" /></ToggleButton>
+          <ToggleButton value="right" sx={{ '&.Mui-selected': { background: 'rgba(var(--primary-rgb),0.12)', color: 'var(--primary-main)' } }}><FormatAlignRight fontSize="small" /></ToggleButton>
         </ToggleButtonGroup>
       </ControlBlock>
     </>
@@ -246,13 +293,13 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
   if (!selectedElement) {
     return (
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.4 }}>
-        <Box sx={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(150,57,145,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.5 }}>
-          <TextFields sx={{ color: '#963991', fontSize: 22 }} />
+        <Box sx={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(var(--primary-rgb),0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.5 }}>
+          <TextFields sx={{ color: 'var(--primary-main)', fontSize: 22 }} />
         </Box>
         <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#444', textAlign: 'center' }}>
           Select an element
         </Typography>
-        <Typography sx={{ fontSize: '0.75rem', color: '#aaa', textAlign: 'center', mt: 0.5 }}>
+        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', mt: 0.5 }}>
           Click any element on the canvas to edit its properties.
         </Typography>
       </Box>
@@ -264,29 +311,31 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Box sx={{
           width: 30, height: 30, borderRadius: '8px',
-          background: 'linear-gradient(135deg, rgba(150,57,145,0.15), rgba(150,57,145,0.08))',
-          border: '1px solid rgba(150,57,145,0.2)',
+          background: 'linear-gradient(135deg, rgba(var(--primary-rgb),0.15), rgba(var(--primary-rgb),0.08))',
+          border: '1px solid rgba(var(--primary-rgb),0.2)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          {selectedElement.type === 'text'
-            ? <TextFields sx={{ fontSize: 15, color: '#963991' }} />
-            : <ImageIcon sx={{ fontSize: 15, color: '#963991' }} />}
+          {selectedElement.type === 'text' && <TextFields sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+          {selectedElement.type === 'image' && <ImageIcon sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+          {selectedElement.type === 'button' && <SmartButton sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+          {selectedElement.type === 'divider' && <HorizontalRule sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
         </Box>
         <Box>
-          <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: '#1a1a2e', lineHeight: 1 }}>
-            {selectedElement.type === 'text' ? 'Text' : 'Image'} Properties
+          <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1 }}>
+            {selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)} Properties
           </Typography>
-          <Typography sx={{ fontSize: '0.7rem', color: '#aaa' }}>
+          <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
             Edit element below
           </Typography>
         </Box>
       </Box>
 
-      <Divider sx={{ mb: 2, borderColor: 'rgba(150,57,145,0.08)' }} />
+      <Divider sx={{ mb: 2, borderColor: 'rgba(var(--primary-rgb),0.08)' }} />
 
       <Stack spacing={1.5}>
-        {selectedElement.type === 'text' && <TextControls element={selectedElement} onUpdate={onUpdate} />}
+        {(selectedElement.type === 'text' || selectedElement.type === 'button') && <TextControls element={selectedElement} onUpdate={onUpdate} />}
         {selectedElement.type === 'image' && <ImageControls element={selectedElement} onUpdate={onUpdate} />}
+        {selectedElement.type === 'divider' && <DividerControls element={selectedElement} onUpdate={onUpdate} />}
 
         <Button
           fullWidth variant="outlined"

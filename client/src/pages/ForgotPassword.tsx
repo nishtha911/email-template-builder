@@ -31,13 +31,13 @@ const ForgotPassword = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f3e8ff 0%, #fdf4ff 40%, #ede9fe 100%)',
+        background: 'linear-gradient(135deg, var(--bg-gradient-3) 0%, var(--bg-gradient-2) 40%, var(--bg-gradient-3) 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ position: 'absolute', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(150,57,145,0.13) 0%, transparent 70%)', top: -80, left: -80 }} />
-      <Box sx={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(150,57,145,0.09) 0%, transparent 70%)', bottom: -60, right: -60 }} />
+      <Box sx={{ position: 'absolute', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(var(--primary-rgb),0.13) 0%, transparent 70%)', top: -80, left: -80 }} />
+      <Box sx={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(var(--primary-rgb),0.09) 0%, transparent 70%)', bottom: -60, right: -60 }} />
 
       <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
         <Paper
@@ -45,9 +45,9 @@ const ForgotPassword = () => {
           sx={{
             p: 5,
             borderRadius: '24px',
-            background: 'rgba(255, 255, 255, 0.7)',
+            background: 'rgba(var(--bg-paper-rgb), 0.7)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.5)',
+            border: '1px solid rgba(var(--bg-paper-rgb), 0.5)',
           }}
         >
           <Box textAlign="center" mb={4}>
@@ -59,17 +59,17 @@ const ForgotPassword = () => {
                 width: 56,
                 height: 56,
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #963991, #c060bb)',
-                boxShadow: '0 8px 16px rgba(150,57,145,0.3)',
+                background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light))',
+                boxShadow: '0 8px 16px rgba(var(--primary-rgb),0.3)',
                 mb: 2,
               }}
             >
-              <LockResetIcon sx={{ color: 'white', fontSize: 28 }} />
+              <LockResetIcon sx={{ color: 'var(--bg-paper-solid)', fontSize: 28 }} />
             </Box>
 
             {!sent ? (
               <>
-                <Typography variant="h5" fontWeight="800" color="#1a1a2e" gutterBottom>
+                <Typography variant="h5" fontWeight="800" color="var(--text-primary)" gutterBottom>
                   Forgot Password?
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -78,7 +78,7 @@ const ForgotPassword = () => {
               </>
             ) : (
               <>
-                <Typography variant="h5" fontWeight="800" color="#1a1a2e" gutterBottom>
+                <Typography variant="h5" fontWeight="800" color="var(--text-primary)" gutterBottom>
                   Check Your Email
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -113,10 +113,10 @@ const ForgotPassword = () => {
                     fontWeight: 'bold',
                     textTransform: 'none',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #963991, #b84db3)',
-                    boxShadow: '0 4px 18px rgba(150,57,145,0.35)',
+                    background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
+                    boxShadow: '0 4px 18px rgba(var(--primary-rgb),0.35)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #7a2d75, #963991)',
+                      background: 'linear-gradient(135deg, var(--primary-dark), var(--primary-main))',
                     }
                   }}
                 >

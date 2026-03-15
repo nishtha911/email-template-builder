@@ -19,17 +19,17 @@ interface Template {
 }
 
 const glassCard = {
-  background: 'rgba(255,255,255,0.6)',
+  background: 'rgba(var(--bg-paper-rgb),0.6)',
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)',
-  border: '1px solid rgba(255,255,255,0.8)',
+  border: '1px solid rgba(var(--bg-paper-rgb),0.8)',
   borderRadius: '18px',
-  boxShadow: '0 4px 24px rgba(150,57,145,0.08)',
+  boxShadow: '0 4px 24px rgba(var(--primary-rgb),0.08)',
   transition: 'transform 0.2s, box-shadow 0.2s',
 };
 
 const COLORS = [
-  { bg: 'rgba(150,57,145,0.08)', border: 'rgba(150,57,145,0.2)', icon: '#963991' },
+  { bg: 'rgba(var(--primary-rgb),0.08)', border: 'rgba(var(--primary-rgb),0.2)', icon: 'var(--primary-main)' },
   { bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.2)', icon: '#7c3aed' },
   { bg: 'rgba(8,145,178,0.08)', border: 'rgba(8,145,178,0.2)', icon: '#0891b2' },
   { bg: 'rgba(5,150,105,0.08)', border: 'rgba(5,150,105,0.2)', icon: '#059669' },
@@ -71,17 +71,17 @@ const TemplateList = () => {
   return (
     <Box sx={{
       minHeight: '100vh', p: { xs: 3, md: 4 },
-      background: 'linear-gradient(145deg, #faf5ff 0%, #fdf4ff 50%, #f3e8ff 100%)',
+      background: 'linear-gradient(145deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%)',
     }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography sx={{ fontSize: '0.82rem', color: '#963991', fontWeight: 600, letterSpacing: '0.5px', mb: 0.5 }}>
+          <Typography sx={{ fontSize: '0.82rem', color: 'var(--primary-main)', fontWeight: 600, letterSpacing: '0.5px', mb: 0.5 }}>
             YOUR WORKSPACE
           </Typography>
-          <Typography sx={{ fontSize: '1.9rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.5px' }}>
+          <Typography sx={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
             My Templates
           </Typography>
-          <Typography sx={{ color: '#999', mt: 0.5, fontSize: '0.88rem' }}>
+          <Typography sx={{ color: 'var(--text-secondary)', mt: 0.5, fontSize: '0.88rem' }}>
             {loading ? '' : `${templates.length} template${templates.length !== 1 ? 's' : ''} total`}
           </Typography>
         </Box>
@@ -89,11 +89,11 @@ const TemplateList = () => {
           startIcon={<AddIcon />}
           onClick={() => navigate('/editor')}
           sx={{
-            background: 'linear-gradient(135deg, #963991, #b84db3)',
-            color: 'white', fontWeight: 700, fontSize: '0.88rem',
+            background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
+            color: 'var(--bg-paper-solid)', fontWeight: 700, fontSize: '0.88rem',
             borderRadius: '12px', px: 2.5, py: 1.2, textTransform: 'none',
-            boxShadow: '0 4px 16px rgba(150,57,145,0.3)',
-            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(150,57,145,0.4)' },
+            boxShadow: '0 4px 16px rgba(var(--primary-rgb),0.3)',
+            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(var(--primary-rgb),0.4)' },
             transition: 'all 0.2s',
           }}
         >
@@ -103,13 +103,13 @@ const TemplateList = () => {
 
       <Box sx={{
         display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap',
-        background: 'rgba(255,255,255,0.55)',
+        background: 'rgba(var(--bg-paper-rgb),0.55)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.8)',
+        border: '1px solid rgba(var(--bg-paper-rgb),0.8)',
         borderRadius: '16px',
         p: 2,
-        boxShadow: '0 2px 12px rgba(150,57,145,0.06)',
+        boxShadow: '0 2px 12px rgba(var(--primary-rgb),0.06)',
       }}>
         <TextField
           placeholder="Search templates..."
@@ -118,15 +118,15 @@ const TemplateList = () => {
             flexGrow: 1,
             '& .MuiOutlinedInput-root': {
               borderRadius: '10px',
-              background: 'rgba(255,255,255,0.7)',
-              '& fieldset': { borderColor: 'rgba(150,57,145,0.18)' },
-              '&:hover fieldset': { borderColor: 'rgba(150,57,145,0.35)' },
-              '&.Mui-focused fieldset': { borderColor: '#963991' },
+              background: 'rgba(var(--bg-paper-rgb),0.7)',
+              '& fieldset': { borderColor: 'rgba(var(--primary-rgb),0.18)' },
+              '&:hover fieldset': { borderColor: 'rgba(var(--primary-rgb),0.35)' },
+              '&.Mui-focused fieldset': { borderColor: 'var(--primary-main)' },
             },
           }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          slotProps={{ input: { startAdornment: <SearchIcon sx={{ mr: 1, color: '#963991', fontSize: 20 }} /> } }}
+          slotProps={{ input: { startAdornment: <SearchIcon sx={{ mr: 1, color: 'var(--primary-main)', fontSize: 20 }} /> } }}
         />
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <Select
@@ -135,8 +135,8 @@ const TemplateList = () => {
             onChange={(e) => setSort(e.target.value)}
             sx={{
               borderRadius: '10px',
-              background: 'rgba(255,255,255,0.7)',
-              '& fieldset': { borderColor: 'rgba(150,57,145,0.18)' },
+              background: 'rgba(var(--bg-paper-rgb),0.7)',
+              '& fieldset': { borderColor: 'rgba(var(--primary-rgb),0.18)' },
             }}
           >
             <MenuItem value="newest">Recent First</MenuItem>
@@ -168,16 +168,16 @@ const TemplateList = () => {
       {!loading && !error && filteredTemplates.length === 0 && (
         <Box sx={{
           textAlign: 'center', mt: 8, py: 6,
-          background: 'rgba(255,255,255,0.5)',
+          background: 'rgba(var(--bg-paper-rgb),0.5)',
           backdropFilter: 'blur(12px)',
           borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.8)',
+          border: '1px solid rgba(var(--bg-paper-rgb),0.8)',
         }}>
-          <LibraryBooksIcon sx={{ fontSize: 48, color: '#963991', opacity: 0.3, mb: 2 }} />
+          <LibraryBooksIcon sx={{ fontSize: 48, color: 'var(--primary-main)', opacity: 0.3, mb: 2 }} />
           <Typography sx={{ fontWeight: 700, color: '#444', mb: 0.5 }}>
             {search ? 'No templates match your search' : 'No templates yet'}
           </Typography>
-          <Typography sx={{ fontSize: '0.85rem', color: '#aaa', mb: 3 }}>
+          <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)', mb: 3 }}>
             {search ? 'Try a different keyword.' : 'Create your first template to get started.'}
           </Typography>
           {!search && (
@@ -185,10 +185,10 @@ const TemplateList = () => {
               startIcon={<AddIcon />}
               onClick={() => navigate('/editor')}
               sx={{
-                background: 'linear-gradient(135deg, #963991, #b84db3)',
-                color: 'white', fontWeight: 700, borderRadius: '10px',
+                background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
+                color: 'var(--bg-paper-solid)', fontWeight: 700, borderRadius: '10px',
                 px: 2.5, textTransform: 'none',
-                boxShadow: '0 4px 14px rgba(150,57,145,0.25)',
+                boxShadow: '0 4px 14px rgba(var(--primary-rgb),0.25)',
               }}
             >
               Create Template
@@ -207,7 +207,7 @@ const TemplateList = () => {
                   elevation={0}
                   sx={{
                     ...glassCard,
-                    '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(150,57,145,0.14)' },
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(var(--primary-rgb),0.14)' },
                     cursor: 'pointer',
                   }}
                   onClick={() => navigate(`/editor?id=${t.id}`)}
@@ -224,12 +224,12 @@ const TemplateList = () => {
                         </Box>
                         <Box sx={{ overflow: 'hidden' }}>
                           <Typography sx={{
-                            fontWeight: 700, fontSize: '0.92rem', color: '#1a1a2e',
+                            fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)',
                             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           }}>
                             {t.name}
                           </Typography>
-                          <Typography sx={{ fontSize: '0.75rem', color: '#aaa', mt: 0.3 }}>
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.3 }}>
                             {new Date(t.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </Typography>
                         </Box>
@@ -239,7 +239,7 @@ const TemplateList = () => {
                           <IconButton
                             size="small"
                             onClick={() => navigate(`/editor?id=${t.id}`)}
-                            sx={{ color: '#963991', '&:hover': { background: 'rgba(150,57,145,0.08)' } }}
+                            sx={{ color: 'var(--primary-main)', '&:hover': { background: 'rgba(var(--primary-rgb),0.08)' } }}
                           >
                             <EditIcon sx={{ fontSize: 17 }} />
                           </IconButton>

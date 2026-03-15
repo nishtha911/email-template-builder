@@ -9,7 +9,7 @@ const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { setUser } = useAuth();
+  const {  } = useAuth();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -17,10 +17,9 @@ const Register = () => {
     setLoading(true);
     setError('');
     try {
-      const { data } = await signUp(formData);
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      navigate('/dashboard');
+      await signUp(formData);
+      // Removed auto-login
+      navigate('/login', { state: { message: 'Registration successful. Please log in.' } });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -35,13 +34,13 @@ const Register = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f3e8ff 0%, #fdf4ff 40%, #ede9fe 100%)',
+        background: 'linear-gradient(135deg, var(--bg-gradient-3) 0%, var(--bg-gradient-2) 40%, var(--bg-gradient-3) 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ position: 'absolute', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(150,57,145,0.13) 0%, transparent 70%)', top: -80, right: -80 }} />
-      <Box sx={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(150,57,145,0.09) 0%, transparent 70%)', bottom: -60, left: -60 }} />
+      <Box sx={{ position: 'absolute', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(var(--primary-rgb),0.13) 0%, transparent 70%)', top: -80, right: -80 }} />
+      <Box sx={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(var(--primary-rgb),0.09) 0%, transparent 70%)', bottom: -60, left: -60 }} />
 
       <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
         <Paper
@@ -49,9 +48,10 @@ const Register = () => {
           sx={{
             p: 5,
             borderRadius: '24px',
-            background: 'rgba(255, 255, 255, 0.7)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.5)',
+            background: 'rgba(var(--bg-paper-rgb), 0.85)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'var(--shadow-lg)',
           }}
         >
           <Box textAlign="center" mb={4}>
@@ -63,14 +63,14 @@ const Register = () => {
                 width: 56,
                 height: 56,
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #963991, #c060bb)',
-                boxShadow: '0 8px 16px rgba(150,57,145,0.3)',
+                background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light))',
+                boxShadow: '0 8px 16px rgba(var(--primary-rgb),0.3)',
                 mb: 2,
               }}
             >
-              <PersonAddIcon sx={{ color: 'white', fontSize: 28 }} />
+              <PersonAddIcon sx={{ color: 'var(--bg-paper-solid)', fontSize: 28 }} />
             </Box>
-            <Typography variant="h5" fontWeight="800" color="#1a1a2e" gutterBottom>
+            <Typography variant="h5" fontWeight="800" color="var(--text-primary)" gutterBottom>
               Create Account
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -121,10 +121,10 @@ const Register = () => {
                 fontWeight: 'bold',
                 textTransform: 'none',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #963991, #b84db3)',
-                boxShadow: '0 4px 18px rgba(150,57,145,0.35)',
+                background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
+                boxShadow: '0 4px 18px rgba(var(--primary-rgb),0.35)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #7a2d75, #963991)',
+                  background: 'linear-gradient(135deg, var(--primary-dark), var(--primary-main))',
                 }
               }}
             >

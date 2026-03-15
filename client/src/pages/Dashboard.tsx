@@ -29,17 +29,17 @@ interface StatCardProps {
 }
 
 const glassCard = {
-  background: 'rgba(255,255,255,0.6)',
+  background: 'rgba(var(--bg-paper-rgb),0.7)',
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)',
-  border: '1px solid rgba(255,255,255,0.8)',
+  border: '1px solid var(--border-subtle)',
   borderRadius: '18px',
-  boxShadow: '0 4px 24px rgba(150,57,145,0.08)',
+  boxShadow: 'var(--shadow-md)',
   transition: 'transform 0.2s, box-shadow 0.2s',
 };
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, loading }) => (
-  <Card elevation={0} sx={{ ...glassCard, '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 32px rgba(150,57,145,0.14)' } }}>
+  <Card elevation={0} sx={{ ...glassCard, '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 32px rgba(var(--primary-rgb),0.14)' } }}>
     <CardContent sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{
@@ -51,14 +51,14 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, loading 
         }}>
           {icon}
         </Box>
-        <Chip label="All time" size="small" sx={{ fontSize: '0.7rem', height: 22, bgcolor: 'rgba(0,0,0,0.04)', color: '#999' }} />
+        <Chip label="All time" size="small" sx={{ fontSize: '0.7rem', height: 22, bgcolor: 'rgba(0,0,0,0.04)', color: 'var(--text-secondary)' }} />
       </Box>
       {loading ? (
         <Skeleton width={40} height={36} />
       ) : (
-        <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: '#1a1a2e', lineHeight: 1 }}>{value}</Typography>
+        <Typography sx={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{value}</Typography>
       )}
-      <Typography sx={{ fontSize: '0.82rem', color: '#888', mt: 0.5, fontWeight: 500 }}>{label}</Typography>
+      <Typography sx={{ fontSize: '0.82rem', color: 'var(--text-secondary)', mt: 0.5, fontWeight: 500 }}>{label}</Typography>
     </CardContent>
   </Card>
 );
@@ -87,16 +87,16 @@ const Dashboard = () => {
   return (
     <Box sx={{
       minHeight: '100vh', p: { xs: 3, md: 4 },
-      background: 'linear-gradient(145deg, #faf5ff 0%, #fdf4ff 50%, #f3e8ff 100%)',
+      background: 'linear-gradient(145deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%)',
     }}>
       <Box sx={{ mb: 4 }}>
-        <Typography sx={{ fontSize: '0.85rem', color: '#963991', fontWeight: 600, letterSpacing: '0.5px', mb: 0.5 }}>
+        <Typography sx={{ fontSize: '0.85rem', color: 'var(--primary-main)', fontWeight: 600, letterSpacing: '0.5px', mb: 0.5 }}>
           {greeting()},
         </Typography>
-        <Typography sx={{ fontSize: '1.9rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
+        <Typography sx={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
           {user?.name || 'Designer'}
         </Typography>
-        <Typography sx={{ color: '#999', mt: 0.5, fontSize: '0.9rem' }}>
+        <Typography sx={{ color: 'var(--text-secondary)', mt: 0.5, fontSize: '0.9rem' }}>
           Here's what's happening with your templates today.
         </Typography>
       </Box>
@@ -107,7 +107,7 @@ const Dashboard = () => {
             icon={<TemplatesIcon fontSize="small" />}
             label="Total Templates"
             value={templates.length}
-            color="#963991"
+            color="var(--primary-main)"
             loading={loading}
           />
         </Grid>
@@ -143,12 +143,12 @@ const Dashboard = () => {
           <Card elevation={0} sx={glassCard}>
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1a1a2e' }}>Recent Templates</Typography>
+                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>Recent Templates</Typography>
                 <Button
                   endIcon={<ArrowIcon fontSize="small" />}
                   size="small"
                   onClick={() => navigate('/templates')}
-                  sx={{ color: '#963991', fontWeight: 700, fontSize: '0.78rem', textTransform: 'none' }}
+                  sx={{ color: 'var(--primary-main)', fontWeight: 700, fontSize: '0.78rem', textTransform: 'none' }}
                 >
                   View all
                 </Button>
@@ -157,7 +157,7 @@ const Dashboard = () => {
               {loading && (
                 <Box>
                   {[1, 2, 3].map((i) => (
-                    <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 1.5, borderBottom: '1px solid var(--border-subtle)' }}>
                       <Skeleton variant="rounded" width={36} height={36} sx={{ mr: 2, borderRadius: '10px' }} />
                       <Box sx={{ flexGrow: 1 }}>
                         <Skeleton width="60%" height={16} />
@@ -170,7 +170,7 @@ const Dashboard = () => {
 
               {!loading && recentTemplates.length === 0 && (
                 <Box sx={{ textAlign: 'center', py: 4, opacity: 0.4 }}>
-                  <TemplatesIcon sx={{ fontSize: 36, color: '#963991', mb: 1 }} />
+                  <TemplatesIcon sx={{ fontSize: 36, color: 'var(--primary-main)', mb: 1 }} />
                   <Typography variant="body2" fontWeight={600}>No templates yet</Typography>
                   <Typography variant="caption" color="textSecondary">Create your first template to see it here.</Typography>
                 </Box>
@@ -181,11 +181,11 @@ const Dashboard = () => {
                   key={t.id}
                   sx={{
                     display: 'flex', alignItems: 'center', py: 1.8,
-                    borderBottom: i < recentTemplates.length - 1 ? '1px solid rgba(150,57,145,0.07)' : 'none',
+                    borderBottom: i < recentTemplates.length - 1 ? '1px solid rgba(var(--primary-rgb),0.07)' : 'none',
                     cursor: 'pointer',
                     borderRadius: '10px',
                     px: 1,
-                    '&:hover': { background: 'rgba(150,57,145,0.04)' },
+                    '&:hover': { background: 'rgba(var(--primary-rgb),0.04)' },
                     transition: 'background 0.15s',
                   }}
                   onClick={() => navigate(`/editor?id=${t.id}`)}
@@ -200,14 +200,14 @@ const Dashboard = () => {
                     <TemplatesIcon sx={{ fontSize: 16, color: `hsl(${(i * 80 + 280) % 360}, 55%, 45%)` }} />
                   </Box>
                   <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: '#1a1a2e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {t.name}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#aaa' }}>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                       {new Date(t.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </Typography>
                   </Box>
-                  <ArrowIcon sx={{ fontSize: 16, color: '#ccc' }} />
+                  <ArrowIcon sx={{ fontSize: 16, color: 'var(--text-secondary)', opacity: 0.5 }} />
                 </Box>
               ))}
             </CardContent>
@@ -217,7 +217,7 @@ const Dashboard = () => {
         <Grid size={{ xs: 12, md: 5 }}>
           <Card elevation={0} sx={{ ...glassCard, height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1a1a2e', mb: 2.5 }}>Quick Actions</Typography>
+              <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)', mb: 2.5 }}>Quick Actions</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 <Button
                   fullWidth
@@ -225,10 +225,10 @@ const Dashboard = () => {
                   onClick={() => navigate('/editor')}
                   sx={{
                     justifyContent: 'flex-start', py: 1.8, px: 2.5, borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #963991, #b84db3)',
-                    color: 'white', fontWeight: 700, fontSize: '0.88rem', textTransform: 'none',
-                    boxShadow: '0 4px 16px rgba(150,57,145,0.3)',
-                    '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(150,57,145,0.4)' },
+                    background: 'linear-gradient(135deg, var(--primary-main), var(--primary-light-alt))',
+                    color: 'var(--bg-paper-solid)', fontWeight: 700, fontSize: '0.88rem', textTransform: 'none',
+                    boxShadow: '0 4px 16px rgba(var(--primary-rgb),0.3)',
+                    '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(var(--primary-rgb),0.4)' },
                     transition: 'all 0.2s',
                   }}
                 >
@@ -240,10 +240,10 @@ const Dashboard = () => {
                   onClick={() => navigate('/templates')}
                   sx={{
                     justifyContent: 'flex-start', py: 1.8, px: 2.5, borderRadius: '12px',
-                    background: 'rgba(150,57,145,0.07)',
-                    border: '1px solid rgba(150,57,145,0.15)',
-                    color: '#963991', fontWeight: 700, fontSize: '0.88rem', textTransform: 'none',
-                    '&:hover': { background: 'rgba(150,57,145,0.12)' },
+                    background: 'rgba(var(--primary-rgb),0.07)',
+                    border: '1px solid rgba(var(--primary-rgb),0.15)',
+                    color: 'var(--primary-main)', fontWeight: 700, fontSize: '0.88rem', textTransform: 'none',
+                    '&:hover': { background: 'rgba(var(--primary-rgb),0.12)' },
                     transition: 'all 0.2s',
                   }}
                 >

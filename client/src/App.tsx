@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import { Box, CircularProgress } from '@mui/material';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Home from './pages/Home';
 
 import React from 'react';
 
@@ -18,7 +19,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: '#963991' }} />
+        <CircularProgress sx={{ color: 'var(--primary-main)' }} />
       </Box>
     );
   }
@@ -44,7 +45,7 @@ const AppRoutes = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <CircularProgress sx={{ color: '#963991' }} />
+        <CircularProgress sx={{ color: 'var(--primary-main)' }} />
       </Box>
     );
   }
@@ -79,7 +80,7 @@ const AppRoutes = () => {
         }
       />
 
-      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+      <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       <Route path="/forgot-password" element={!user ? <ForgotPassword /> : <Navigate to="/dashboard" replace />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />

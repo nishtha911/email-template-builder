@@ -1,24 +1,104 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { CustomThemeProvider, useCustomTheme } from './context/ThemeContext';
+import './index.css';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#963991',
+// Inner component so we can read ThemeContext to build MUI theme dynamically
+function ThemedApp() {
+  const { mode } = useCustomTheme();
+
+  const theme = createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: '#4f46e5',
+        light: '#818cf8',
+        dark: '#3730a3',
+      },
+      secondary: {
+        main: '#6366f1',
+      },
+      background: {
+        default: mode === 'dark' ? '#0f172a' : '#f8fafc',
+        paper: mode === 'dark' ? '#1e293b' : '#ffffff',
+      },
+      text: {
+        primary: mode === 'dark' ? '#f1f5f9' : '#1a1a2e',
+        secondary: mode === 'dark' ? '#94a3b8' : '#64748b',
+      },
+      divider: mode === 'dark' ? 'rgba(148,163,184,0.12)' : 'rgba(79,70,229,0.1)',
     },
-    secondary: {
-      main: '#7a2d75',
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-});
+    shape: {
+      borderRadius: 12,
+    },
+    components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: 'none',
+            backgroundColor: mode === 'dark' ? '#1e293b' : '#ffffff',
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: mode === 'dark' ? 'rgba(148,163,184,0.2)' : 'rgba(79,70,229,0.15)',
+              },
+              '&:hover fieldset': {
+                borderColor: mode === 'dark' ? 'rgba(148,163,184,0.4)' : 'rgba(79,70,229,0.3)',
+              },
+            },
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+          },
+        },
+      },
+    },
+  });
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  );
+}
 
 createRoot(document.getElementById('root')!).render(
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <App />
-  </ThemeProvider>
+  <CustomThemeProvider>
+    <ThemedApp />
+  </CustomThemeProvider>
 )
