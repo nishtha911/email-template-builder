@@ -1,11 +1,118 @@
+# === SECURITY / SECRETS =======================================================
+# Never commit secrets
 .env
-.env.local
-.env.development
+.env.*
+!.env.example
+*.env.local
+*.env.development
+*.env.production
+*.env.test
 config.js
-settings.py
 firebase.json
-aws keys
-jwt secrets
-api keys
+aws*
+*aws*key*
+*aws*secret*
+*secret*
+*secrets*
+*credential*
+*credentials*
+*jwt*
+*apikey*
+*api-key*
+*api_key*
+*serviceAccount*.json
 
+# === LOGS ====================================================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
 
+# === RUNTIME / CACHE / TEMP ==================================================
+.tmp
+.temp
+.cache
+.cache-loader
+.vite
+vite.config.ts.timestamp-*
+pnpm-store
+.pnpm-debug.log*
+.nyc_output
+coverage
+*.tsbuildinfo
+
+# === GENERAL NODE =============================================================
+node_modules/
+dist/
+build/
+lib/
+out/
+.eslintcache
+
+# === MONOREPO: CLIENT (Vite) =================================================
+# Build outputs
+client/node_modules/
+client/dist/
+client/dist-ssr/
+# Vite caches
+client/.vite/
+client/.cache/
+# Local env overrides (if any exist in client)
+client/.env
+client/.env.*
+
+# === MONOREPO: SERVER (Express + TS) =========================================
+# Build outputs
+server/node_modules/
+server/dist/
+server/build/
+server/lib/
+# TS incremental
+server/*.tsbuildinfo
+server/**/.tsbuildinfo
+# Caches
+server/.cache/
+# Local env overrides
+server/.env
+server/.env.*
+
+# === DOCKER (optional; uncomment if you use Docker) ==========================
+# docker-compose.override.yml
+# .docker
+# .dockerignore.local
+# *.tar
+
+# === EDITORS / OS NOISE ======================================================
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Windows / Visual Studio (rare in JS monorepos)
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === TEST ARTIFACTS ==========================================================
+junit.xml
+test-results/
+playwright-report/
+playwright/.cache/
+.cypress/
