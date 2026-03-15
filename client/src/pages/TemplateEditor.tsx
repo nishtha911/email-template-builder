@@ -6,7 +6,9 @@ import {
 } from '@mui/material';
 import {
   TextFields, Image as ImageIcon, Visibility, Close,
-  ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule
+  ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule,
+  ViewModule,
+  PermMedia
 } from '@mui/icons-material';
 import { Tabs, Tab } from '@mui/material';
 import {
@@ -113,7 +115,7 @@ const DroppableCanvas: React.FC<DroppableCanvasProps> = ({ children, isOver, isE
     <Box
       ref={setNodeRef}
       sx={{
-        width: '100%', maxWidth: 640, minHeight: '80vh', mx: 'auto',
+        width: '100%', maxWidth: 640, minHeight: '85dvh', mx: 'auto',
         background: 'rgba(var(--bg-paper-rgb),0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
@@ -343,21 +345,45 @@ const TemplateEditor: React.FC = () => {
 
         <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
           <Box sx={{
-            width: 130, p: 0, pt: 1,
+            width: 250, p: 0, pt: 1,
             borderRight: '1px solid rgba(var(--primary-rgb),0.1)',
             background: 'rgba(var(--bg-paper-rgb),0.5)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0,
           }}>
-            <Tabs 
-              value={activeTab} 
-              onChange={(e, v) => setActiveTab(v)} 
-              variant="fullWidth" 
-              sx={{ width: '100%', mb: 2, minHeight: 40, '& .MuiTab-root': { minHeight: 40, fontSize: '0.7rem', fontWeight: 700 } }}
+            <Tabs
+              value={activeTab}
+              onChange={(_e, v) => setActiveTab(v)}
+              variant="fullWidth"
+              sx={{
+                width: '100%',
+                mb: 2,
+                minHeight: 40,
+                '& .MuiTab-root': {
+                  minHeight: 40,
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  color: 'var(--text-secondary)',
+                  transition: 'color 0.2s ease, transform 0.2s ease',
+                  '&.Mui-selected': {
+                    color: 'var(--primary-main)',
+                  },
+                  '&:hover': {
+                    color: 'var(--primary-main)',
+                    transform: 'scale(1.05)',
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: 'var(--primary-main)',
+                  height: 3,
+                  borderRadius: 2,
+                },
+              }}
             >
-              <Tab label="Elements" />
-              <Tab label="Media" />
+              <Tab icon={<ViewModule fontSize="small" />} iconPosition="start" label="Elements" />
+              <Tab icon={<PermMedia fontSize="small" />} iconPosition="start" label="Media" />
             </Tabs>
 
             <Box sx={{ width: '100%', px: 1.5, display: activeTab === 0 ? 'block' : 'none' }}>
@@ -379,8 +405,8 @@ const TemplateEditor: React.FC = () => {
           </Box>
 
           <Box
-            sx={{ flexGrow: 1, p: 4, overflowY: 'auto' }}
-            onClick={() => setSelectedId(null)}
+            sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}
+            // onClick={() => setSelectedId(null)}
           >
             <DroppableCanvas isOver={isOver} isEmpty={elements.length === 0}>
               {elements.map((el) => (
@@ -409,39 +435,42 @@ const TemplateEditor: React.FC = () => {
               ))}
             </DroppableCanvas>
           </Box>
-
-          <Box sx={{
-            width: 300, flexShrink: 0,
-            borderLeft: '1px solid rgba(var(--primary-rgb),0.1)',
-            background: 'rgba(var(--bg-paper-rgb),0.55)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            overflowY: 'auto',
-          }}>
-            <PropertiesSidebar
-              selectedElement={selectedElement}
-              onUpdate={(upd: UpdatePayload) =>
-                setElements((els) =>
-                  els.map((e) =>
-                    e.id === selectedId
-                      ? { ...e, ...upd, styles: { ...e.styles, ...upd.styles } }
-                      : e
-                  )
-                )
-              }
-              onDelete={() => {
-                setElements((els) => els.filter((e) => e.id !== selectedId));
-                setSelectedId(null);
-              }}
-            />
-          </Box>
+          {
+            selectedId && (
+              <Box sx={{
+                width: 300, flexShrink: 0,
+                borderLeft: '1px solid rgba(var(--primary-rgb),0.1)',
+                background: 'rgba(var(--bg-paper-rgb),0.55)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                overflowY: 'auto',
+              }}>
+                <PropertiesSidebar
+                  selectedElement={selectedElement}
+                  onUpdate={(upd: UpdatePayload) =>
+                    setElements((els) =>
+                      els.map((e) =>
+                        e.id === selectedId
+                          ? { ...e, ...upd, styles: { ...e.styles, ...upd.styles } }
+                          : e
+                      )
+                    )
+                  }
+                  onDelete={() => {
+                    setElements((els) => els.filter((e) => e.id !== selectedId));
+                    setSelectedId(null);
+                  }}
+                />
+              </Box>
+            )
+          }
         </Box>
       </Box>
 
       <DragOverlay dropAnimation={null}>
         {activeType && (
           <Box sx={{
-            p: 1.5, width: 90, borderRadius: '12px',
+            p: 1.5, width: 150, borderRadius: '12px',
             background: 'rgba(var(--bg-paper-rgb),0.95)',
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(var(--primary-rgb),0.3)',

@@ -1,11 +1,12 @@
 import React from 'react';
 import {
   Box, Typography, Slider, TextField, ToggleButtonGroup, ToggleButton,
-  Divider, Stack, Button, Select, MenuItem, FormControl
+  Divider, Stack, Select, MenuItem, FormControl,
+  IconButton
 } from '@mui/material';
 import {
   FormatAlignLeft, FormatAlignCenter, FormatAlignRight,
-  FormatBold, FormatItalic, FormatUnderlined, DeleteOutline,
+  FormatBold, FormatItalic, FormatUnderlined, Delete as DeleteIcon,
   TextFields, Image as ImageIcon, SmartButton, HorizontalRule
 } from '@mui/icons-material';
 
@@ -307,37 +308,53 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
   }
 
   return (
-    <Box sx={{ p: 2, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <Box sx={{
-          width: 30, height: 30, borderRadius: '8px',
-          background: 'linear-gradient(135deg, rgba(var(--primary-rgb),0.15), rgba(var(--primary-rgb),0.08))',
-          border: '1px solid rgba(var(--primary-rgb),0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {selectedElement.type === 'text' && <TextFields sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
-          {selectedElement.type === 'image' && <ImageIcon sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
-          {selectedElement.type === 'button' && <SmartButton sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
-          {selectedElement.type === 'divider' && <HorizontalRule sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+    <Box sx={{ p: 2, overflowY: 'auto', height: '100%', boxSizing: 'border-box'}}>
+      <Stack display={'flex'} direction={'row'} justifyContent={'space-between'} mb={1} >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+          <Box sx={{
+            width: 30, height: 30, borderRadius: '8px',
+            background: 'linear-gradient(135deg, rgba(var(--primary-rgb),0.15), rgba(var(--primary-rgb),0.08))',
+            border: '1px solid rgba(var(--primary-rgb),0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {selectedElement.type === 'text' && <TextFields sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+            {selectedElement.type === 'image' && <ImageIcon sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+            {selectedElement.type === 'button' && <SmartButton sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+            {selectedElement.type === 'divider' && <HorizontalRule sx={{ fontSize: 15, color: 'var(--primary-main)' }} />}
+          </Box>
+          <Box>
+            <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1 }}>
+              {selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)} Properties
+            </Typography>
+            <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+              Edit element below
+            </Typography>
+          </Box>
         </Box>
-        <Box>
-          <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1 }}>
-            {selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)} Properties
-          </Typography>
-          <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-            Edit element below
-          </Typography>
-        </Box>
-      </Box>
+        <IconButton
+          onClick={onDelete}
+          sx={{
+            alignSelf: 'flex-start', // aligns it properly at the top
+            color: '#d32f2f',        // red color
+            transition: 'transform 0.2s ease, color 0.2s ease',
+            '&:hover': {
+              color: '#b71c1c',      // darker red on hover
+              transform: 'scale(1.1)', // subtle zoom animation
+            },
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Stack>
 
       <Divider sx={{ mb: 2, borderColor: 'rgba(var(--primary-rgb),0.08)' }} />
 
-      <Stack spacing={1.5}>
+      <Stack spacing={1}>
         {(selectedElement.type === 'text' || selectedElement.type === 'button') && <TextControls element={selectedElement} onUpdate={onUpdate} />}
         {selectedElement.type === 'image' && <ImageControls element={selectedElement} onUpdate={onUpdate} />}
         {selectedElement.type === 'divider' && <DividerControls element={selectedElement} onUpdate={onUpdate} />}
 
-        <Button
+        {/* <Button
           fullWidth variant="outlined"
           startIcon={<DeleteOutline fontSize="small" />}
           onClick={onDelete}
@@ -349,7 +366,7 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
           }}
         >
           Delete Element
-        </Button>
+        </Button> */}
       </Stack>
     </Box>
   );
