@@ -6,7 +6,7 @@ import templateRoutes from "./modules/templates/template.routes.js";
 const app = express();
 
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGIN,
+    origin: process.env.CORS_ALLOWED_ORIGIN,
     credentials: true,
 }));
 app.use(express.json());
