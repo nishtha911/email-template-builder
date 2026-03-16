@@ -21,3 +21,4 @@ export const saveTemplate = (data :any) => API.post('/templates/save', data);
 export const fetchTemplates = () => API.get('/templates/all');
 export const fetchTemplateById = (id : any ) => API.get(`/templates/${id}`);
 export const deleteTemplate = (id : any) => API.delete(`/templates/${id}`);
+export const uploadMedia = (data: FormData) => API.post('/upload', data, { headers: { 'Content-Type': 'multipart/form-data' } });

@@ -80,6 +80,14 @@ const AppRoutes = () => {
         }
       />
 
+      <Route
+        path="/editor/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout><TemplateEditor /></MainLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route path="/" element={!user ? <Home /> : <Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       <Route path="/forgot-password" element={!user ? <ForgotPassword /> : <Navigate to="/dashboard" replace />} />

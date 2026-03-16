@@ -9,7 +9,7 @@ import {
   ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule,
   ViewModule,
   PermMedia,
-  SmartToy
+  SmartToy, Undo, Redo, Delete as DeleteIcon
 } from '@mui/icons-material';
 import { Tabs, Tab } from '@mui/material';
 import {
@@ -19,9 +19,9 @@ import {
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import PropertiesSidebar from '../components/Editor/PropertiesSidebar';
-import { saveTemplate, fetchTemplates } from '../api/index';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { red } from '@mui/material/colors';
+import { saveTemplate, fetchTemplates, uploadMedia } from '../api/index';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Resizable } from 're-resizable';
 
 interface ElementStyles {
   fontSize?: number;
@@ -44,11 +44,13 @@ interface CanvasElement {
   type: 'text' | 'image' | 'button' | 'divider';
   content: string;
   styles: ElementStyles;
+  href?: string;
 }
 
 interface UpdatePayload {
   content?: string;
   styles?: Partial<ElementStyles>;
+  href?: string;
 }
 
 interface SnackbarState {
@@ -61,6 +63,7 @@ interface DraggableToolProps {
   type: string;
   icon: React.ReactNode;
   label: string;
+  customContent?: string;
 }
 
 interface DroppableCanvasProps {
@@ -69,10 +72,10 @@ interface DroppableCanvasProps {
   isEmpty: boolean;
 }
 
-const DraggableTool: React.FC<DraggableToolProps> = ({ type, icon, label }) => {
+const DraggableTool: React.FC<DraggableToolProps> = ({ type, icon, label, customContent }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `tool-${type}`,
-    data: { type }
+    id: `tool-${type}-${customContent ? 'custom' : 'default'}`,
+    data: { type, customContent }
   });
 
   return (
@@ -156,8 +159,73 @@ const TemplateEditor: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState(0);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+
+  const [history, setHistory] = useState<CanvasElement[][]>([[]]);
+  const [historyStep, setHistoryStep] = useState(0);
+
+  const updateElements = (newElements: CanvasElement[] | ((prev: CanvasElement[]) => CanvasElement[])) => {
+    setElements((prev) => {
+      const nextEls = typeof newElements === 'function' ? newElements(prev) : newElements;
+      const newHistory = history.slice(0, historyStep + 1);
+      newHistory.push(nextEls);
+      setHistory(newHistory);
+      setHistoryStep(newHistory.length - 1);
+      return nextEls;
+    });
+  };
+
+  const handleUndo = () => {
+    if (historyStep > 0) {
+      setHistoryStep((prev) => prev - 1);
+      setElements(history[historyStep - 1]);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyStep < history.length - 1) {
+      setHistoryStep((prev) => prev + 1);
+      setElements(history[historyStep + 1]);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [historyStep, history]);
+
+  const moveElement = (elementId: string, direction: 'up' | 'down') => {
+    updateElements((prev) => {
+      const index = prev.findIndex(el => el.id === elementId);
+      if (index === -1) return prev;
+      if (direction === 'up' && index === 0) return prev;
+      if (direction === 'down' && index === prev.length - 1) return prev;
+      
+      const newElements = [...prev];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      
+      const temp = newElements[index];
+      newElements[index] = newElements[targetIndex];
+      newElements[targetIndex] = temp;
+      
+      return newElements;
+    });
+  };
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiMessages, setAiMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
@@ -185,17 +253,19 @@ const TemplateEditor: React.FC = () => {
   const { isOver } = useDroppable({ id: 'canvas-droppable' });
 
   useEffect(() => {
-    const id = searchParams.get('id');
     if (!id) return;
     fetchTemplates().then(({ data }) => {
       const t = data.find((tmpl: { id: string }) => String(tmpl.id) === id);
       if (t) {
         setTemplateId(t.id);
         setTemplateTitle(t.name);
-        setElements(Array.isArray(t.content) ? t.content : []);
+        const initialElements = Array.isArray(t.content) ? t.content : [];
+        setElements(initialElements);
+        setHistory([initialElements]);
+        setHistoryStep(0);
       }
     }).catch(() => { });
-  }, [searchParams]);
+  }, [id]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -210,6 +280,7 @@ const TemplateEditor: React.FC = () => {
     setActiveType(null);
     if (!over || over.id !== 'canvas-droppable') return;
     const type = active.data.current?.type as 'text' | 'image' | 'button' | 'divider';
+    const customContent = active.data.current?.customContent as string | undefined;
     if (!type) return;
 
     const newElement: CanvasElement = {
@@ -217,7 +288,7 @@ const TemplateEditor: React.FC = () => {
       type,
       content:
         type === 'text' ? 'Placeholder Text'
-          : type === 'image' ? 'https://community.softr.io/uploads/db9110/original/2X/7/74e6e7e382d0ff5d7773ca9a87e6f6f8817a68a6.jpeg'
+          : type === 'image' ? (customContent || 'https://community.softr.io/uploads/db9110/original/2X/7/74e6e7e382d0ff5d7773ca9a87e6f6f8817a68a6.jpeg')
           : type === 'button' ? 'Click Me'
           : '',
       styles:
@@ -227,7 +298,7 @@ const TemplateEditor: React.FC = () => {
           : { borderTop: '2px solid #dddddd', width: '100%', margin: '15px 0' }
     };
 
-    setElements((prev) => [...prev, newElement]);
+    updateElements((prev) => [...prev, newElement]);
     setSelectedId(newElement.id);
   };
 
@@ -262,7 +333,10 @@ const TemplateEditor: React.FC = () => {
       } else if (el.type === 'divider') {
         htmlContent += `<hr style="${styles}" />`;
       } else if (el.type === 'button') {
-        htmlContent += `<div style="text-align:${el.styles.textAlign || 'center'};"><a href="#" style="text-decoration:none;${styles}">${renderPreviewContent(el.content)}</a></div>`;
+        const contentHtml = el.href
+          ? `<a href="${el.href}" target="_blank" style="text-decoration:none;display:inline-block;${styles}">${renderPreviewContent(el.content)}</a>`
+          : `<span style="display:inline-block;${styles}">${renderPreviewContent(el.content)}</span>`;
+        htmlContent += `<div style="text-align:${el.styles.textAlign || 'center'};">${contentHtml}</div>`;
       } else {
         htmlContent += `<div style="${styles}">${renderPreviewContent(el.content)}</div>`;
       }
@@ -324,7 +398,22 @@ const TemplateEditor: React.FC = () => {
                 }}
               />
             </Box>
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Tooltip title="Undo (Ctrl+Z)">
+                <span>
+                  <IconButton size="small" onClick={handleUndo} disabled={historyStep === 0} sx={{ color: historyStep === 0 ? 'inherit' : 'var(--primary-main)' }}>
+                    <Undo fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Redo (Ctrl+Y)">
+                <span>
+                  <IconButton size="small" onClick={handleRedo} disabled={historyStep === history.length - 1} sx={{ color: historyStep === history.length - 1 ? 'inherit' : 'var(--primary-main)' }}>
+                    <Redo fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(var(--primary-rgb),0.2)', my: 1 }} />
               <Button
                 startIcon={<Visibility sx={{ fontSize: 17 }} />}
                 onClick={() => setIsPreviewOpen(true)}
@@ -435,9 +524,33 @@ const TemplateEditor: React.FC = () => {
                <Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)', mb: 2 }}>
                  Upload and manage your assets here.
                </Typography>
-               <Button variant="outlined" size="small" sx={{ width: '100%', fontSize: '0.7rem', mb: 2 }}>Upload Image</Button>
-               <Box sx={{ width: '100%', aspectRatio: '1/1', background: 'rgba(var(--primary-rgb), 0.1)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <ImageIcon sx={{ color: 'var(--primary-main)', opacity: 0.5 }} />
+               <input
+                 type="file"
+                 accept="image/*"
+                 id="upload-image-input"
+                 style={{ display: 'none' }}
+                 onChange={async (e) => {
+                   if (e.target.files && e.target.files[0]) {
+                     const formData = new FormData();
+                     formData.append('image', e.target.files[0]);
+                     try {
+                        const res = await uploadMedia(formData);
+                        setUploadedImages(prev => [...prev, res.data.imageUrl]);
+                     } catch (err) {
+                        setSnackbar({ open: true, message: 'Upload failed', severity: 'error' });
+                     }
+                   }
+                 }}
+               />
+               <label htmlFor="upload-image-input">
+                 <Button component="span" variant="outlined" size="small" sx={{ width: '100%', fontSize: '0.7rem', mb: 2 }}>Upload Image</Button>
+               </label>
+               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                 {uploadedImages.map((src, i) => (
+                   <Box key={i} sx={{ width: '45%' }}>
+                     <DraggableTool type="image" icon={<img src={src} style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} alt="" />} label="Image" customContent={src} />
+                   </Box>
+                 ))}
                </Box>
             </Box>
 
@@ -560,7 +673,7 @@ const TemplateEditor: React.FC = () => {
                   key={el.id}
                   onClick={(e) => { e.stopPropagation(); setSelectedId(el.id); }}
                   sx={{
-                    mb: 2, p: 1, cursor: 'pointer', borderRadius: '8px',
+                    mb: 2, p: 1, cursor: 'pointer', borderRadius: '8px', position: 'relative',
                     outline: selectedId === el.id ? '2px solid var(--primary-main)' : '2px solid transparent',
                     outlineOffset: '2px',
                     transition: 'outline 0.15s',
@@ -569,14 +682,128 @@ const TemplateEditor: React.FC = () => {
                 >
                   {el.type === 'text' && <Typography sx={el.styles as object}>{el.content}</Typography>}
                   {el.type === 'image' && (
-                    <Box component="img" src={el.content} sx={{ width: '100%', borderRadius: `${el.styles.borderRadius ?? 0}px` }} />
+                    <Resizable
+                      size={{ width: (el.styles.width as string | number) || '100%', height: (el.styles.height as string | number) || 'auto' }}
+                      onResizeStop={(_e, _direction, ref, _d) => {
+                        updateElements((prev) =>
+                          prev.map((item) =>
+                            item.id === el.id
+                              ? { ...item, styles: { ...item.styles, width: ref.style.width, height: ref.style.height } }
+                              : item
+                          )
+                        );
+                      }}
+                      enable={{
+                        right: selectedId === el.id,
+                        bottom: selectedId === el.id,
+                        bottomRight: selectedId === el.id,
+                      }}
+                      style={{ overflow: 'hidden', display: 'flex', position: 'relative' }}
+                    >
+                      <img src={el.content} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: `${el.styles.borderRadius ?? 0}px` }} alt="" />
+                    </Resizable>
                   )}
                   {el.type === 'button' && (
                     <Box sx={{ textAlign: el.styles.textAlign || 'center' }}>
-                      <Box component="span" sx={{ ...el.styles as object }}>{el.content}</Box>
+                      {el.href ? (
+                        <a href={el.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                          <Box component="span" sx={{ ...el.styles as object }}>{el.content}</Box>
+                        </a>
+                      ) : (
+                        <Box component="span" sx={{ ...el.styles as object }}>{el.content}</Box>
+                      )}
                     </Box>
                   )}
                   {el.type === 'divider' && <Box component="hr" sx={el.styles as object} />}
+                  
+                  {selectedId === el.id && (
+                    <Box sx={{
+                      position: 'absolute', top: -46, right: 0, 
+                      background: 'rgba(var(--bg-paper-rgb),0.98)', 
+                      backdropFilter: 'blur(12px)',
+                      borderRadius: '10px', p: 0.5,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                      border: '1px solid rgba(var(--primary-rgb),0.25)',
+                      display: 'flex', alignItems: 'center', gap: 0.5, zIndex: 10,
+                    }}>
+                      {el.type === 'button' && (
+                        <TextField
+                          size="small"
+                          placeholder="Link URL"
+                          value={el.href || ''}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            updateElements((prev) =>
+                              prev.map((item) =>
+                                item.id === el.id ? { ...item, href: e.target.value } : item
+                              )
+                            );
+                          }}
+                          sx={{
+                            width: 130,
+                            ml: 0.5,
+                            mr: 0.5,
+                            backgroundColor: 'white',
+                            borderRadius: '4px',
+                            '& .MuiInputBase-input': { fontSize: '0.75rem', py: 0.5, px: 1 }
+                          }}
+                        />
+                      )}
+                      {(el.type === 'text' || el.type === 'button') && (
+                        <>
+                          <Tooltip title="Decrease Font Size">
+                            <IconButton size="small" onClick={(e) => {
+                              e.stopPropagation();
+                              const currentSize = (el.styles as any).fontSize || 16;
+                              updateElements(prev => prev.map(item => item.id === el.id ? { ...item, styles: { ...item.styles, fontSize: Math.max(8, currentSize - 2) } } : item));
+                            }} sx={{ width: 28, height: 28, color: 'var(--text-primary)' }}>
+                              <Typography sx={{ fontWeight: 800 }}>-</Typography>
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Increase Font Size">
+                            <IconButton size="small" onClick={(e) => {
+                              e.stopPropagation();
+                              const currentSize = (el.styles as any).fontSize || 16;
+                              updateElements(prev => prev.map(item => item.id === el.id ? { ...item, styles: { ...item.styles, fontSize: Math.min(72, currentSize + 2) } } : item));
+                            }} sx={{ width: 28, height: 28, color: 'var(--text-primary)' }}>
+                              <Typography sx={{ fontWeight: 800 }}>+</Typography>
+                            </IconButton>
+                          </Tooltip>
+                          <Divider orientation="vertical" flexItem sx={{ mx: 0.5, borderColor: 'var(--border-subtle)' }} />
+                        </>
+                      )}
+                      <Tooltip title="Move Up">
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); moveElement(el.id, 'up'); }} sx={{ width: 28, height: 28 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Move Down">
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); moveElement(el.id, 'down'); }} sx={{ width: 28, height: 28 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Duplicate">
+                        <IconButton size="small" onClick={(e) => { 
+                          e.stopPropagation(); 
+                          const newEl = { ...el, id: `el-${Date.now()}` };
+                          updateElements(prev => {
+                            const idx = prev.findIndex(item => item.id === el.id);
+                            const copy = [...prev];
+                            copy.splice(idx + 1, 0, newEl);
+                            return copy;
+                          });
+                          setSelectedId(newEl.id);
+                        }} sx={{ width: 28, height: 28 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); updateElements(prev => prev.filter(item => item.id !== el.id)); setSelectedId(null); }} sx={{ width: 28, height: 28, color: '#d32f2f' }}>
+                          <DeleteIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
                 </Box>
               ))}
             </DroppableCanvas>
@@ -594,7 +821,7 @@ const TemplateEditor: React.FC = () => {
                 <PropertiesSidebar
                   selectedElement={selectedElement}
                   onUpdate={(upd: UpdatePayload) =>
-                    setElements((els) =>
+                    updateElements((els) =>
                       els.map((e) =>
                         e.id === selectedId
                           ? { ...e, ...upd, styles: { ...e.styles, ...upd.styles } }
@@ -603,7 +830,7 @@ const TemplateEditor: React.FC = () => {
                     )
                   }
                   onDelete={() => {
-                    setElements((els) => els.filter((e) => e.id !== selectedId));
+                    updateElements((els) => els.filter((e) => e.id !== selectedId));
                     setSelectedId(null);
                   }}
                 />
