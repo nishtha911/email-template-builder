@@ -238,7 +238,7 @@ const TemplateList = () => {
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
-                            onClick={() => navigate(`/editor?id=${t.id}`)}
+                            onClick={() => navigate(`/editor/${t.id}`)}
                             sx={{ color: 'var(--primary-main)', '&:hover': { background: 'rgba(var(--primary-rgb),0.08)' } }}
                           >
                             <EditIcon sx={{ fontSize: 17 }} />
