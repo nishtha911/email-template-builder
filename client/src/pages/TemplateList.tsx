@@ -210,7 +210,7 @@ const TemplateList = () => {
                     '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(var(--primary-rgb),0.14)' },
                     cursor: 'pointer',
                   }}
-                  onClick={() => navigate(`/editor?id=${t.id}`)}
+                  onClick={() => navigate(`/editor/${t.id}`)}
                 >
                   <CardContent sx={{ p: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
