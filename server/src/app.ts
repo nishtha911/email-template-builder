@@ -7,7 +7,7 @@ import uploadRoutes from "./modules/upload/upload.routes.js";
 const app = express();
 
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGIN || "http://localhost:3000",
+    origin: process.env.CORS_ALLOWED_ORIGIN || "http://localhost:3000",
     credentials: true,
 }));
 app.use(express.json());
