@@ -2,7 +2,18 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { CustomThemeProvider, useCustomTheme } from './context/ThemeContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './index.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Inner component so we can read ThemeContext to build MUI theme dynamically
 function ThemedApp() {
@@ -98,7 +109,10 @@ function ThemedApp() {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <CustomThemeProvider>
-    <ThemedApp />
-  </CustomThemeProvider>
+  <QueryClientProvider client={queryClient}>
+    <CustomThemeProvider>
+      <ThemedApp />
+    </CustomThemeProvider>
+    <ReactQueryDevtools initialIsOpen={false} />
+  </QueryClientProvider>
 )

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box, Typography, TextField, MenuItem, Select, FormControl,
   Grid, Card, CardContent, Fade,
@@ -10,13 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useNavigate } from 'react-router-dom';
-import { fetchTemplates, deleteTemplate } from '../api';
-
-interface Template {
-  id: string;
-  name: string;
-  created_at: string;
-}
+import { useTemplates, useDeleteTemplate } from '../hooks/useTemplates';
 
 const glassCard = {
   background: 'rgba(var(--bg-paper-rgb),0.6)',
@@ -36,28 +30,17 @@ const COLORS = [
 ];
 
 const TemplateList = () => {
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const { data: templates = [], isLoading: loading, isError } = useTemplates();
+  const deleteTemplateMutation = useDeleteTemplate();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchTemplates()
-      .then(({ data }) => setTemplates(data))
-      .catch((err) => setError(err.response?.data?.message || 'Failed to load templates.'))
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this template?')) return;
-    try {
-      await deleteTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-    } catch {
-      alert('Failed to delete template.');
-    }
+    deleteTemplateMutation.mutate(id, {
+      onError: () => alert('Failed to delete template.'),
+    });
   };
 
   const filteredTemplates = templates
@@ -159,13 +142,13 @@ const TemplateList = () => {
         </Grid>
       )}
 
-      {!loading && error && (
+      {!loading && isError && (
         <Box sx={{ textAlign: 'center', mt: 10 }}>
-          <Typography sx={{ color: '#dc2626', fontWeight: 600 }}>{error}</Typography>
+          <Typography sx={{ color: '#dc2626', fontWeight: 600 }}>Failed to load templates.</Typography>
         </Box>
       )}
 
-      {!loading && !error && filteredTemplates.length === 0 && (
+      {!loading && !isError && filteredTemplates.length === 0 && (
         <Box sx={{
           textAlign: 'center', mt: 8, py: 6,
           background: 'rgba(var(--bg-paper-rgb),0.5)',

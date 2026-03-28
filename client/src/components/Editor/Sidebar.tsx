@@ -10,12 +10,12 @@ import {
   ChevronRight as ChevronRightIcon, Logout as LogoutIcon,
   DarkMode as DarkModeIcon, LightMode as LightModeIcon
 } from '@mui/icons-material';
-import { useAuth } from './../../context/AuthContext';
+import { useAuthStore } from './../../store/authStore';
 import { useCustomTheme } from './../../context/ThemeContext';
 
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
-  const { logout, user } = useAuth();
+  const { logout, user } = useAuthStore();
   const { mode, toggleTheme } = useCustomTheme();
   const navigate = useNavigate();
   const location = useLocation();

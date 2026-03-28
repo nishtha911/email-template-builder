@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Box, Typography, Grid, Card, CardContent, Button,
   Skeleton, Chip
@@ -11,14 +11,8 @@ import {
   ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { fetchTemplates } from '../api';
-
-interface Template {
-  id: string;
-  name: string;
-  created_at: string;
-}
+import { useAuthStore } from '../store/authStore';
+import { useTemplates } from '../hooks/useTemplates';
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -64,17 +58,9 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, loading 
 );
 
 const Dashboard = () => {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { data: templates = [], isLoading: loading } = useTemplates();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchTemplates()
-      .then(({ data }) => setTemplates(data))
-      .catch(() => { })
-      .finally(() => setLoading(false));
-  }, []);
 
   const recentTemplates = templates.slice(0, 3);
   const greeting = () => {

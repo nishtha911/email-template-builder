@@ -7,8 +7,7 @@ import {
 import {
   TextFields, Image as ImageIcon, Visibility, Close,
   ArrowBack, DragIndicator, FileDownload, SmartButton, HorizontalRule,
-  ViewModule,
-  PermMedia,
+  ViewModule, PermMedia,
   SmartToy, Undo, Redo, Delete as DeleteIcon
 } from '@mui/icons-material';
 import { Tabs, Tab } from '@mui/material';
@@ -19,44 +18,16 @@ import {
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import PropertiesSidebar from '../components/Editor/PropertiesSidebar';
-import { saveTemplate, fetchTemplates, uploadMedia } from '../api/index';
+import { uploadMedia } from '../api/index';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Resizable } from 're-resizable';
-
-interface ElementStyles {
-  fontSize?: number;
-  textAlign?: string;
-  color?: string;
-  fontFamily?: string;
-  fontWeight?: string;
-  fontStyle?: string;
-  textDecoration?: string;
-  borderRadius?: number;
-  width?: string;
-  display?: string;
-  marginLeft?: string;
-  marginRight?: string;
-  [key: string]: unknown;
-}
-
-interface CanvasElement {
-  id: string;
-  type: 'text' | 'image' | 'button' | 'divider';
-  content: string;
-  styles: ElementStyles;
-  href?: string;
-}
+import { useEditorStore, type CanvasElement } from '../store/editorStore';
+import { useTemplateById, useSaveTemplate } from '../hooks/useTemplates';
 
 interface UpdatePayload {
   content?: string;
-  styles?: Partial<ElementStyles>;
+  styles?: any;
   href?: string;
-}
-
-interface SnackbarState {
-  open: boolean;
-  message: string;
-  severity: 'success' | 'error' | 'warning' | 'info';
 }
 
 interface DraggableToolProps {
@@ -150,59 +121,46 @@ const DroppableCanvas: React.FC<DroppableCanvasProps> = ({ children, isOver, isE
 };
 
 const TemplateEditor: React.FC = () => {
-  const [elements, setElements] = useState<CanvasElement[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const {
+    elements, selectedId, templateTitle, templateId,
+    saving, snackbar, historyStep, history,
+    setSelectedId, setTemplateTitle, setTemplateId,
+    setSaving, setSnackbar, closeSnackbar,
+    updateElements, undo, redo, resetEditor, loadTemplate,
+  } = useEditorStore();
+
   const [activeType, setActiveType] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [templateTitle, setTemplateTitle] = useState('New Template');
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState(0);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiMessages, setAiMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([]);
 
-  const [history, setHistory] = useState<CanvasElement[][]>([[]]);
-  const [historyStep, setHistoryStep] = useState(0);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { isOver } = useDroppable({ id: 'canvas-droppable' });
 
-  const updateElements = (newElements: CanvasElement[] | ((prev: CanvasElement[]) => CanvasElement[])) => {
-    setElements((prev) => {
-      const nextEls = typeof newElements === 'function' ? newElements(prev) : newElements;
-      const newHistory = history.slice(0, historyStep + 1);
-      newHistory.push(nextEls);
-      setHistory(newHistory);
-      setHistoryStep(newHistory.length - 1);
-      return nextEls;
-    });
-  };
+  const { data: templateData } = useTemplateById(id);
+  const saveTemplateMutation = useSaveTemplate();
 
-  const handleUndo = () => {
-    if (historyStep > 0) {
-      setHistoryStep((prev) => prev - 1);
-      setElements(history[historyStep - 1]);
+  useEffect(() => {
+    if (!id) {
+      resetEditor();
+      return;
     }
-  };
-
-  const handleRedo = () => {
-    if (historyStep < history.length - 1) {
-      setHistoryStep((prev) => prev + 1);
-      setElements(history[historyStep + 1]);
+    if (templateData) {
+      const els = Array.isArray(templateData.content) ? (templateData.content as CanvasElement[]) : [];
+      loadTemplate(templateData.id, templateData.name, els);
     }
-  };
+  }, [id, templateData]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        if (e.shiftKey) {
-          handleRedo();
-        } else {
-          handleUndo();
-        }
+        if (e.shiftKey) redo(); else undo();
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-        handleRedo();
+        redo();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -215,57 +173,28 @@ const TemplateEditor: React.FC = () => {
       if (index === -1) return prev;
       if (direction === 'up' && index === 0) return prev;
       if (direction === 'down' && index === prev.length - 1) return prev;
-      
       const newElements = [...prev];
       const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      
       const temp = newElements[index];
       newElements[index] = newElements[targetIndex];
       newElements[targetIndex] = temp;
-      
       return newElements;
     });
   };
 
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiMessages, setAiMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
-  
   const handleAiSend = () => {
     if (!aiPrompt.trim()) return;
-  
     const userMessage = { role: "user" as const, text: aiPrompt };
-  
     setAiMessages((prev) => [...prev, userMessage]);
-  
-    // Simulated AI response (replace with API call)
     setTimeout(() => {
       const aiResponse = {
         role: "ai" as const,
         text: "Here is a generated email section. You can drag it into the canvas.",
       };
-  
       setAiMessages((prev) => [...prev, aiResponse]);
     }, 800);
-  
     setAiPrompt("");
   };
-
-  const { isOver } = useDroppable({ id: 'canvas-droppable' });
-
-  useEffect(() => {
-    if (!id) return;
-    fetchTemplates().then(({ data }) => {
-      const t = data.find((tmpl: { id: string }) => String(tmpl.id) === id);
-      if (t) {
-        setTemplateId(t.id);
-        setTemplateTitle(t.name);
-        const initialElements = Array.isArray(t.content) ? t.content : [];
-        setElements(initialElements);
-        setHistory([initialElements]);
-        setHistoryStep(0);
-      }
-    }).catch(() => { });
-  }, [id]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -302,24 +231,25 @@ const TemplateEditor: React.FC = () => {
     setSelectedId(newElement.id);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (elements.length === 0) {
       setSnackbar({ open: true, message: 'Add at least one element before saving.', severity: 'warning' });
       return;
     }
+    const payload = { name: templateTitle, content: elements, ...(templateId && { id: templateId }) };
     setSaving(true);
-    try {
-      const payload = { name: templateTitle, content: elements, ...(templateId && { id: templateId }) };
-      const res = await saveTemplate(payload);
-      const saved = res.data.template;
-      setTemplateId(saved.id);
-      setSnackbar({ open: true, message: templateId ? 'Template updated.' : 'Template saved.', severity: 'success' });
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setSnackbar({ open: true, message: msg || 'Failed to save template.', severity: 'error' });
-    } finally {
-      setSaving(false);
-    }
+    saveTemplateMutation.mutate(payload, {
+      onSuccess: (res) => {
+        const saved = res.data.template;
+        setTemplateId(saved.id);
+        setSnackbar({ open: true, message: templateId ? 'Template updated.' : 'Template saved.', severity: 'success' });
+      },
+      onError: (err: unknown) => {
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        setSnackbar({ open: true, message: msg || 'Failed to save template.', severity: 'error' });
+      },
+      onSettled: () => setSaving(false),
+    });
   };
 
   const handleExportHTML = () => {
@@ -401,14 +331,14 @@ const TemplateEditor: React.FC = () => {
             <Stack direction="row" spacing={1.5} alignItems="center">
               <Tooltip title="Undo (Ctrl+Z)">
                 <span>
-                  <IconButton size="small" onClick={handleUndo} disabled={historyStep === 0} sx={{ color: historyStep === 0 ? 'inherit' : 'var(--primary-main)' }}>
+                  <IconButton size="small" onClick={undo} disabled={historyStep === 0} sx={{ color: historyStep === 0 ? 'inherit' : 'var(--primary-main)' }}>
                     <Undo fontSize="small" />
                   </IconButton>
                 </span>
               </Tooltip>
               <Tooltip title="Redo (Ctrl+Y)">
                 <span>
-                  <IconButton size="small" onClick={handleRedo} disabled={historyStep === history.length - 1} sx={{ color: historyStep === history.length - 1 ? 'inherit' : 'var(--primary-main)' }}>
+                  <IconButton size="small" onClick={redo} disabled={historyStep === history.length - 1} sx={{ color: historyStep === history.length - 1 ? 'inherit' : 'var(--primary-main)' }}>
                     <Redo fontSize="small" />
                   </IconButton>
                 </span>
@@ -665,7 +595,6 @@ const TemplateEditor: React.FC = () => {
 
           <Box
             sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}
-            // onClick={() => setSelectedId(null)}
           >
             <DroppableCanvas isOver={isOver} isEmpty={elements.length === 0}>
               {elements.map((el) => (
@@ -910,10 +839,10 @@ const TemplateEditor: React.FC = () => {
 
       <Snackbar
         open={snackbar.open} autoHideDuration={3000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
           {snackbar.message}
         </Alert>
       </Snackbar>

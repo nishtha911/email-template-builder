@@ -65,7 +65,7 @@ interface PropertiesSidebarProps {
   onDelete: () => void;
 }
 
-const sxField = {
+const sxField: any = {
   '& .MuiOutlinedInput-root': {
     borderRadius: '8px', fontSize: '0.85rem',
     background: 'rgba(var(--bg-paper-rgb),0.7)',
@@ -147,13 +147,13 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
         <SectionLabel>Text Color</SectionLabel>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <input
-            type="color" value={s.color || '#333333'}
+            type="color" value={(s.color as string) || '#333333'}
             onChange={(e) => onUpdate({ styles: { color: e.target.value } })}
             style={{ width: 36, height: 34, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
           />
           <TextField
             size="small" variant="outlined"
-            value={s.color || '#333333'}
+            value={(s.color as string) || '#333333'}
             onChange={(e) => onUpdate({ styles: { color: e.target.value } })}
             sx={{ flexGrow: 1, ...sxField }}
           />
@@ -164,13 +164,13 @@ const TextControls: React.FC<TextControlsProps> = ({ element, onUpdate }) => {
         <SectionLabel>Background Color</SectionLabel>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <input
-            type="color" value={s.backgroundColor || '#ffffff'}
+            type="color" value={(s.backgroundColor as string) || '#ffffff'}
             onChange={(e) => onUpdate({ styles: { backgroundColor: e.target.value } })}
             style={{ width: 36, height: 34, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
           />
           <TextField
             size="small" variant="outlined"
-            value={s.backgroundColor || '#ffffff'}
+            value={(s.backgroundColor as string) || '#ffffff'}
             onChange={(e) => onUpdate({ styles: { backgroundColor: e.target.value } })}
             sx={{ flexGrow: 1, ...sxField }}
           />
@@ -218,13 +218,13 @@ const DividerControls: React.FC<ImageControlsProps> = ({ element, onUpdate }) =>
         <SectionLabel>Color</SectionLabel>
          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <input
-            type="color" value={s.borderTopColor || '#dddddd'}
+            type="color" value={(s.borderTopColor as string) || '#dddddd'}
             onChange={(e) => onUpdate({ styles: { borderTop: `2px solid ${e.target.value}`, borderTopColor: e.target.value } })}
             style={{ width: 36, height: 34, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
           />
           <TextField
             size="small" variant="outlined"
-            value={s.borderTopColor || '#dddddd'}
+            value={(s.borderTopColor as string) || '#dddddd'}
             onChange={(e) => onUpdate({ styles: { borderTop: `2px solid ${e.target.value}`, borderTopColor: e.target.value } })}
             sx={{ flexGrow: 1, ...sxField }}
           />
@@ -334,12 +334,12 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
         <IconButton
           onClick={onDelete}
           sx={{
-            alignSelf: 'flex-start', // aligns it properly at the top
-            color: '#d32f2f',        // red color
+            alignSelf: 'flex-start',
+            color: '#d32f2f',
             transition: 'transform 0.2s ease, color 0.2s ease',
             '&:hover': {
-              color: '#b71c1c',      // darker red on hover
-              transform: 'scale(1.1)', // subtle zoom animation
+              color: '#b71c1c',
+              transform: 'scale(1.1)',
             },
           }}
         >
@@ -354,19 +354,6 @@ const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ selectedElement, 
         {selectedElement.type === 'image' && <ImageControls element={selectedElement} onUpdate={onUpdate} />}
         {selectedElement.type === 'divider' && <DividerControls element={selectedElement} onUpdate={onUpdate} />}
 
-        {/* <Button
-          fullWidth variant="outlined"
-          startIcon={<DeleteOutline fontSize="small" />}
-          onClick={onDelete}
-          sx={{
-            fontWeight: 700, fontSize: '0.82rem', textTransform: 'none',
-            borderRadius: '10px', borderColor: 'rgba(211,47,47,0.3)',
-            color: '#d32f2f', mt: 1,
-            '&:hover': { background: 'rgba(211,47,47,0.06)', borderColor: '#d32f2f' },
-          }}
-        >
-          Delete Element
-        </Button> */}
       </Stack>
     </Box>
   );

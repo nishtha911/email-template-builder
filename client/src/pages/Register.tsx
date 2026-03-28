@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { signUp } from '../api';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Container, TextField, Typography, Alert, Paper, Link } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -9,7 +8,6 @@ const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const {  } = useAuth();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -18,7 +16,6 @@ const Register = () => {
     setError('');
     try {
       await signUp(formData);
-      // Removed auto-login
       navigate('/login', { state: { message: 'Registration successful. Please log in.' } });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

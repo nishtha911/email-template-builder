@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Button, Container, TextField, Typography, Alert, Paper, Link } from '@mui/material';
@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { setUser } = useAuth();
+  const { setUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const successMessage = (location.state as any)?.message;

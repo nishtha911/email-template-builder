@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAuthStore } from './store/authStore';
+import { useCurrentUser } from './hooks/useAuth';
 import Sidebar from './components/Editor/Sidebar';
 import Dashboard from './pages/Dashboard';
 import TemplateList from './pages/TemplateList';
@@ -10,11 +11,16 @@ import { Box, CircularProgress } from '@mui/material';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
-
 import React from 'react';
 
+// Bootstraps the current user from the server into the authStore
+const AuthBootstrap = () => {
+  useCurrentUser();
+  return null;
+};
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthStore();
 
   if (loading) {
     return (
@@ -40,7 +46,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthStore();
 
   if (loading) {
     return (
@@ -79,7 +85,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/editor/:id"
         element={
@@ -98,11 +103,10 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthBootstrap />
+      <AppRoutes />
+    </Router>
   );
 }
 
