@@ -14,10 +14,45 @@ A full-stack drag-and-drop email template builder with React + TypeScript on the
 
 ## 📋 Prerequisites
 
-- 🟢 Node.js v18+
-- 🐘 PostgreSQL database
+- 🟢 Node.js v18+ (for development)
+- 🐘 PostgreSQL database (or Docker)
 
-## ⚙️ Environment Setup
+## 🐳 Docker Setup (Recommended)
+
+### 1. 📝 Environment Configuration
+
+Copy the provided `.env` file and update the values:
+
+```bash
+cp .env .env.local  # Optional: for local overrides
+```
+
+Update the following variables in `.env`:
+- `DB_USER`, `DB_PASS`: Database credentials
+- `JWT_SECRET`: A secure random string
+- `EMAIL_USER`, `EMAIL_PASS`: Your email credentials
+
+### 2. 🚀 Run with Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+This will:
+- Start PostgreSQL with the `email_builder` database
+- Run database migrations (schema.sql)
+- Build and start the server on port 5000
+- Build and start the client on port 5173
+
+Access the application at **http://localhost:5173**
+
+### 3. 🛑 Stop Services
+
+```bash
+docker-compose down
+```
+
+## 🔧 Manual Setup (Development)
 
 Create `.env` files in the respective directories.
 
@@ -42,36 +77,7 @@ EMAIL_PASS=your_email_app_password
 VITE_API_URL=http://localhost:5000/api
 ```
 
-## 🚀 Installation & Running
-
-### 1. 📥 Clone the repository
-
-```bash
-git clone https://github.com/nishtha911/email-template-builder.git
-cd email-template-builder
-```
-
-### 2. 🖥️ Server Setup
-
-```bash
-cd server
-npm install
-npm start
-```
-
-Server runs at **http://localhost:5000**
-
-### 3. 🌐 Client Setup
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-Client runs at **http://localhost:3000**
-
-## 🛠️ Tech Stack
+## ️ Tech Stack
 
 | Layer       | Technology                              |
 |-------------|-----------------------------------------|
